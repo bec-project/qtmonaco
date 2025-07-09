@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qtmonaco"
+version = "0.1.0"
+description = "Qt Monaco is a Python library for working with the Monaco Editor in Qt applications."
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = ["PySide6~=6.8.2"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/bec-project/qtmonaco/issues"
+Homepage = "https://github.com/bec-project/qtmonaco"
+
+[tool.hatch.build.targets.wheel]
+include = ["*"]
+exclude = ["docs/**", "tests/**"]
+
+[tool.hatch.build.targets.sdist]
+include = ["*"]
+exclude = ["docs/**", "tests/**"]
