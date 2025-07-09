@@ -12,11 +12,10 @@ Usage:
 import os
 import subprocess
 import xml.etree.ElementTree as ET
-from pathlib import Path
 from typing import List
 
 
-def get_file_list(build_dir: Path) -> List[Path]:
+def get_file_list(build_dir: str) -> List[str]:
     """
     Get list of all files in build directory, excluding certain extensions.
 
@@ -36,17 +35,17 @@ def get_file_list(build_dir: Path) -> List[Path]:
         ]
 
         for filename in filenames:
-            file_path = Path(root) / filename
-            relative_path = file_path.relative_to(build_dir)
+            file_path = os.path.join(root, filename)
+            relative_path = os.path.relpath(file_path, build_dir)
 
             # Skip files with excluded extensions
-            if relative_path.suffix.lower() not in exclude_extensions:
+            if not any(relative_path.endswith(ext) for ext in exclude_extensions):
                 files.append(relative_path)
 
     return sorted(files)
 
 
-def create_qrc_content(files: List[Path], build_dir: Path) -> str:
+def create_qrc_content(files: List[str], build_dir: str) -> str:
     """
     Create QRC XML content from file list.
 
@@ -69,7 +68,7 @@ def create_qrc_content(files: List[Path], build_dir: Path) -> str:
     for file_path in files:
         file_element = ET.SubElement(qresource, "file")
         # Include build directory in the path
-        full_path = build_dir / file_path
+        full_path = os.path.join(build_dir, file_path)
         file_element.text = str(full_path).replace("\\", "/")  # Use forward slashes for Qt
 
     # Pretty print the XML
@@ -80,7 +79,7 @@ def create_qrc_content(files: List[Path], build_dir: Path) -> str:
     return f'<?xml version="1.0" encoding="UTF-8"?>\n{xml_str}\n'
 
 
-def compile_to_rcc(qrc_file: Path, rcc_file: Path) -> bool:
+def compile_to_rcc(qrc_file: str, rcc_file: str) -> bool:
     """
     Compile QRC file to binary RCC file using pyside6-rcc.
 
@@ -92,7 +91,7 @@ def compile_to_rcc(qrc_file: Path, rcc_file: Path) -> bool:
         True if compilation was successful, False otherwise
     """
     try:
-        cmd = ["pyside6-rcc", "-binary", str(qrc_file), "-o", str(rcc_file)]
+        cmd = ["pyside6-rcc", qrc_file, "-o", rcc_file, "--binary"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         return True
     except subprocess.CalledProcessError as e:
@@ -105,12 +104,14 @@ def compile_to_rcc(qrc_file: Path, rcc_file: Path) -> bool:
 
 
 def main():
-    build_dir = Path("dist")
-    qrc_file = Path("monaco_resources.qrc")
-    rcc_file = Path("monaco.rcc")
+
+    build_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist")
+    rcc_build_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "build")
+    qrc_file = "monaco_resources.qrc"
+    rcc_file = os.path.join(rcc_build_dir, "monaco.rcc")
 
     # Validate build directory
-    if not build_dir.exists():
+    if not os.path.exists(build_dir):
         print(f"Error: Build directory '{build_dir}' does not exist")
         print("Make sure to run 'npm run build' first")
         return 1
@@ -138,22 +139,19 @@ def main():
     print(f"\n✓ Generated QRC file: {qrc_file}")
 
     # Compile to RCC
-    print(f"Compiling to RCC file...")
+    print("Compiling to RCC file...")
+    os.makedirs(rcc_build_dir, exist_ok=True)  # Ensure build directory exists
     if compile_to_rcc(qrc_file, rcc_file):
         print(f"✓ Generated RCC file: {rcc_file}")
 
         # Clean up QRC file since we only need the RCC
-        qrc_file.unlink()
-        print(f"✓ Cleaned up temporary QRC file")
+        os.remove(qrc_file)
+        print("✓ Cleaned up temporary QRC file")
 
-        print(f"\n🎉 Success! Use {rcc_file} in your PySide6 application:")
-        print(f"   QResource.registerResource('{rcc_file}')")
-        print(f"   # Access resources with: qrc:/monaco/index.html")
-
+        print("\n🎉 Success!")
         return 0
-    else:
-        print(f"✗ Failed to compile RCC file")
-        return 1
+    print("✗ Failed to compile RCC file")
+    return 1
 
 
 if __name__ == "__main__":

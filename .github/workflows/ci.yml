@@ -1,0 +1,39 @@
+name: Full CI
+on: 
+  push:
+  pull_request:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  check_pr_status:
+    uses: ./.github/workflows/check_pr.yml
+ 
+  build:
+    runs-on: ubuntu-latest
+    needs: check_pr_status
+    if: needs.check_pr_status.outputs.branch-pr == ''
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install
+      - name: Build project
+        run: npm run build
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        run: |
+            pip install ./qtmonaco
+      - name: Build rcc file
+        run: |
+            python ./qtmonaco/generate_rcc.py
