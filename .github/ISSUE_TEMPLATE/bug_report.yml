@@ -1,0 +1,41 @@
+name: Bug report
+description: File a bug report.
+title: "[BUG]: "
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bug report:
+  - type: textarea
+    id: description
+    attributes:
+      label: Provide a brief description of the bug.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Describe what you expected to happen and what actually happened.
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Outline the steps that lead to the bug's occurrence. Be specific and provide a clear sequence of actions.
+  - type: input
+    id: version
+    attributes:
+      label: bec_widgets version
+      description: which version of BEC widgets was running?
+  - type: input
+    id: bec-version
+    attributes:
+      label: bec core version
+      description: which version of BEC core was running?
+  - type: textarea
+    id: extra
+    attributes:
+      label: Any extra info / data? e.g. log output...
+  - type: input
+    id: issues
+    attributes:
+      label: Related issues
+      description: please tag any related issues
