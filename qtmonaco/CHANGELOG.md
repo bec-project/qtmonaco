@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.5 (2025-07-11)
+
+### Bug Fixes
+
+- Update resource handling and build configuration for RCC files
+  ([`72ea277`](https://github.com/bec-project/qtmonaco/commit/72ea277051f6d0920876fd826ffd65067a94b516))
+
+
 ## v0.1.4 (2025-07-11)
 
 ### Bug Fixes
