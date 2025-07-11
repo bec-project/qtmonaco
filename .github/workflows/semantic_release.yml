@@ -115,6 +115,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cd qtmonaco
           pip install python-semantic-release==9.* wheel build twine
           semantic-release -vv version
           if [ ! -d dist ]; then echo No release will be made; exit 0; fi
