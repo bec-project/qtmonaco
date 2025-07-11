@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v0.1.4 (2025-07-11)
+
+### Bug Fixes
+
+- Remove unnecessary command from rcc file build step
+  ([`92f3901`](https://github.com/bec-project/qtmonaco/commit/92f390178a75dcc45433af0d64fe6e69c9c6e4b7))
+
+- Update build configuration to include all files and specify artifacts
+  ([`dac680b`](https://github.com/bec-project/qtmonaco/commit/dac680bbb565fe25623ddc53c766d7468567e180))
+
+### Continuous Integration
+
+- Add debugging output
+  ([`bfc4dc7`](https://github.com/bec-project/qtmonaco/commit/bfc4dc75854d4a9c021af590759cb4722314d601))
+
+
 ## v0.1.3 (2025-07-11)
 
 ### Bug Fixes
