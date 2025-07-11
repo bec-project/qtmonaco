@@ -106,7 +106,7 @@ def compile_to_rcc(qrc_file: str, rcc_file: str) -> bool:
 def main():
 
     build_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist")
-    rcc_build_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "build")
+    rcc_build_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "qtmonaco")
     qrc_file = "monaco_resources.qrc"
     rcc_file = os.path.join(rcc_build_dir, "monaco.rcc")
 
