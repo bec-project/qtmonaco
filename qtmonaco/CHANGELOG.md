@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.2 (2025-07-11)
+
+### Bug Fixes
+
+- Fix rcc location within build
+  ([`31e288f`](https://github.com/bec-project/qtmonaco/commit/31e288f4d2b2c4d7f5872616183a2db5d07a68c2))
+
+
 ## v0.1.1 (2025-07-11)
 
 ### Bug Fixes
