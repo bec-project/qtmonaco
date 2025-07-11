@@ -39,7 +39,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-*.rcc
+*_rcc.py
 node_modules
 
 # PyInstaller

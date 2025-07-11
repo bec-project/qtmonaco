@@ -2,7 +2,7 @@ import os
 
 from qtpy.QtCore import QFile, QIODevice, QResource, QUrl
 
-QResource.registerResource(os.path.join(os.path.dirname(__file__), "monaco.rcc"))
+import qtmonaco._monaco_rcc  # pylint: disable=unused-import
 
 
 def load_resource_html(resource_path: str) -> str:
