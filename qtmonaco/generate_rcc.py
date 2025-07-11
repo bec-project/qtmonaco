@@ -68,7 +68,7 @@ def create_qrc_content(files: List[str], build_dir: str) -> str:
     for file_path in files:
         file_element = ET.SubElement(qresource, "file")
         # Include build directory in the path
-        full_path = os.path.join(build_dir, file_path)
+        full_path = os.path.join("dist", file_path)
         file_element.text = str(full_path).replace("\\", "/")  # Use forward slashes for Qt
 
     # Pretty print the XML

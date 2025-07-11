@@ -40,33 +40,23 @@ declare global {
 window.onload = function () {
   console.log("Window loaded, initializing QWebChannel");
   new QWebChannel(window.qt.webChannelTransport, function (channel) {
-    bridge = channel.objects.bridge;
-    console.log("Bridge object:", bridge);
-    console.log("Bridge methods:", Object.getOwnPropertyNames(bridge));
+    bridge = channel.objects.connector;
 
     // Check if bridge has the expected methods
-    if (bridge && typeof bridge.sendDataChanged?.connect === "function") {
-      bridge.sendDataChanged.connect(updateFromPython);
-      console.log("Successfully connected to sendDataChanged signal");
+    if (bridge) {
+      bridge.javascript_data_sent.connect(updateFromPython);
+      console.log("Successfully connected to javascript_data signal");
     } else {
-      console.warn("Bridge sendDataChanged.connect not available");
+      console.warn("Bridge javascript_data_sent.connect not available");
     }
 
     editor.onDidChangeModelContent((_event) => {
       const model = editor.getModel();
       if (model) {
         const value = model.getValue();
-        sendToPython("setValue", value);
+        sendToPython("_current_text", value);
       }
     });
-
-    // Check if bridge has init method before calling it
-    if (bridge && typeof bridge.init === "function") {
-      bridge.init();
-      console.log("Bridge init method called successfully");
-    } else {
-      console.warn("Bridge init method not available - this is usually fine");
-    }
 
     init();
   });
@@ -74,7 +64,7 @@ window.onload = function () {
 
 function sendToPython(name: string, value: any) {
   if (bridge) {
-    bridge.receive_from_js(name, JSON.stringify(value));
+    bridge._receive(name, JSON.stringify(value));
   }
 }
 
@@ -91,9 +81,9 @@ function updateFromPython(name: string, value: string) {
     case "read":
       // Readout the current value from the editor
       const currentValue = editor.getValue();
-      sendToPython("setValue", currentValue); // Send back the current value
+      sendToPython("_current_text", currentValue); // Send back the current value
       break;
-    case "setCursor": {
+    case "set_cursor": {
       // Set the cursor position in the editor
       const position = data; // Assuming data is an object with line and column properties
       const model = editor.getModel();
@@ -119,7 +109,7 @@ function updateFromPython(name: string, value: string) {
       }
       break;
     }
-    case "readOnly":
+    case "readonly":
       // Set the editor to read-only mode
       const isReadOnly = data === true;
       editor.updateOptions({ readOnly: isReadOnly });
@@ -158,6 +148,7 @@ function updateFromPython(name: string, value: string) {
       // Update LSP client with new URL
       if (data && typeof data === "string") {
         const pylspUrl = data;
+        console.log(`Setting up LSP client with URL: ${pylspUrl}`);
         lspClient = new LspClient(pylspUrl);
       }
       break;
