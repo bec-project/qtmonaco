@@ -35,13 +35,13 @@ dev = [
 Homepage = "https://github.com/bec-project/qtmonaco"
 
 [tool.hatch.build.targets.wheel]
-include = ["*"]
-artifacts = ["qtmonaco/monaco.rcc"]
+ignore-vcs = true
+include = ["**/*", "qtmonaco/monaco.rcc"]
 exclude = ["docs/**", "tests/**"]
 
 [tool.hatch.build.targets.sdist]
-include = ["*"]
-artifacts = ["qtmonaco/monaco.rcc"]
+ignore-vcs = true
+include = ["**/*", "qtmonaco/monaco.rcc"]
 exclude = ["docs/**", "tests/**"]
 
 [tool.black]
