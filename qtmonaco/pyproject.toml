@@ -41,3 +41,62 @@ exclude = ["docs/**", "tests/**"]
 [tool.hatch.build.targets.sdist]
 include = ["*"]
 exclude = ["docs/**", "tests/**"]
+
+[tool.black]
+line-length = 100
+skip-magic-trailing-comma = true
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+known_first_party = ["bec_widgets"]
+
+[tool.semantic_release]
+build_command = "pip install build wheel && python -m build"
+version_toml = ["pyproject.toml:project.version"]
+
+[tool.semantic_release.commit_author]
+env = "GIT_COMMIT_AUTHOR"
+default = "semantic-release <semantic-release>"
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+default_bump_level = 0
+
+[tool.semantic_release.remote]
+name = "origin"
+type = "github"
+ignore_token_for_push = true
+
+[tool.semantic_release.remote.token]
+env = "GH_TOKEN"
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*"]
+upload_to_vcs_release = true
+
+[tool.coverage.report]
+skip_empty = true # exclude empty *files*, e.g. __init__.py, from the report
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "return NotImplemented",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+    'if __name__ == "__main__":',
+]
