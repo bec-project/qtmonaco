@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.3 (2025-07-11)
+
+### Bug Fixes
+
+- Build
+  ([`33d5d70`](https://github.com/bec-project/qtmonaco/commit/33d5d70b0952e24cb693532f112aa42b4e4ef9fa))
+
+
 ## v0.1.2 (2025-07-11)
 
 ### Bug Fixes
