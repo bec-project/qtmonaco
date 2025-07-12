@@ -34,14 +34,6 @@ jobs:
       - name: Install Python dependencies
         run: |
             pip install ./qtmonaco
-      - name: Debug build environment
-        run: |
-            echo "=== Build directory contents ==="
-            ls -la dist/ || echo "dist directory not found"
-            echo "=== Current working directory ==="
-            pwd
-            echo "=== Python path ==="
-            python -c "import sys; print('\n'.join(sys.path))"
       - name: Build rcc file
         run: |
             python ./qtmonaco/generate_rcc.py
@@ -49,10 +41,8 @@ jobs:
         run: |
             echo "=== Generated file info ==="
             ls -la qtmonaco/qtmonaco/_monaco_rcc.py
-            echo "=== File size ==="
-            wc -c qtmonaco/qtmonaco/_monaco_rcc.py
-            echo "=== First few lines ==="
-            head -20 qtmonaco/qtmonaco/_monaco_rcc.py
+            echo "=== File hash (for verification) ==="
+            sha256sum qtmonaco/qtmonaco/_monaco_rcc.py
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

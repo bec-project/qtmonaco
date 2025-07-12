@@ -7,4 +7,14 @@ export default defineConfig({
   server: {
     cors: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Disable filename hashing for consistent builds
+        entryFileNames: "assets/[name].js",
+        chunkFileNames: "assets/[name].js",
+        assetFileNames: "assets/[name].[ext]",
+      },
+    },
+  },
 });
