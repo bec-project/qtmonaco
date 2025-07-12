@@ -36,6 +36,12 @@ jobs:
             pip install ./qtmonaco
       - name: Build rcc file
         run: |
+            echo "=== Dist directory analysis ==="
+            echo "Total files in dist:"
+            find dist -type f | wc -l
+            echo "File sizes:"
+            find dist -type f -exec ls -lh {} \; | awk '{print $5, $9}' | sort -hr | head -20
+            echo "=== Generating RCC ==="
             python ./qtmonaco/generate_rcc.py
       - name: Verify generated file
         run: |
@@ -43,6 +49,8 @@ jobs:
             ls -la qtmonaco/qtmonaco/_monaco_rcc.py
             echo "=== File hash (for verification) ==="
             sha256sum qtmonaco/qtmonaco/_monaco_rcc.py
+            echo "=== Line count comparison ==="
+            wc -l qtmonaco/qtmonaco/_monaco_rcc.py
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
