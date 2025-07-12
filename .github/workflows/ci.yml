@@ -11,14 +11,7 @@ jobs:
     uses: ./.github/workflows/check_pr.yml
  
   build:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            platform: linux
-          - os: macos-latest
-            platform: macos
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     needs: check_pr_status
     if: needs.check_pr_status.outputs.branch-pr == ''
     steps:
@@ -30,68 +23,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.10'
+      - name: Install dependencies
+        run: npm install
+      - name: Build project
+        run: npm run build
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: monaco-build
+          path: dist
+          retention-days: 30
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       - name: Install Python dependencies
         run: |
-            pip install -e ./qtmonaco[dev]
-      - name: Install JS dependencies
-        run: |
-            npm ci --verbose
-      - name: Build project
-        run: npm run build
+            pip install ./qtmonaco
       - name: Build rcc file
         run: |
             python ./qtmonaco/generate_rcc.py
-      - name: Rename RCC file for platform
-        run: |
-            mv qtmonaco/qtmonaco/_monaco_rcc.py qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
-            echo "=== Generated ${{ matrix.platform }} RCC file ==="
-            ls -la qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
-            wc -l qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
-      - name: Upload platform-specific artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: monaco-rcc-${{ matrix.platform }}
-          path: qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
-          retention-days: 30
-
-  package:
-    runs-on: ubuntu-latest
-    needs: [check_pr_status, build]
-    if: needs.check_pr_status.outputs.branch-pr == ''
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Download all platform artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: monaco-rcc-*
-          merge-multiple: false
-      - name: Combine platform RCC files
-        run: |
-            echo "=== Available platform builds ==="
-            find . -name "_monaco_rcc_*.py" -exec ls -la {} \;
-            echo "=== Copying platform-specific RCC files ==="
-            mkdir -p qtmonaco/qtmonaco/
-            cp monaco-rcc-linux/_monaco_rcc_linux.py qtmonaco/qtmonaco/
-            cp monaco-rcc-macos/_monaco_rcc_macos.py qtmonaco/qtmonaco/
-            echo "=== Final RCC files in package ==="
-            ls -la qtmonaco/qtmonaco/_monaco_rcc_*.py
-      - name: Build Python package
-        run: |
-            pip install build
-            python -m build
-      - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-package
-          path: dist/
+          name: monaco-rcc-file
+          path: qtmonaco/qtmonaco/_monaco_rcc.py
           retention-days: 30
 
