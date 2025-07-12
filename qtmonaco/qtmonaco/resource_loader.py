@@ -1,26 +1,18 @@
 import os
 
-from qtpy.QtCore import QFile, QIODevice, QResource, QUrl
-
-import qtmonaco._monaco_rcc  # pylint: disable=unused-import
-
-
-def load_resource_html(resource_path: str) -> str:
-    """Load HTML content from Qt resources."""
-    file = QFile(resource_path)
-    if file.open(QIODevice.OpenModeFlag.ReadOnly):
-        content = file.readAll()
-        file.close()
-        return content.toStdString()
-    else:
-        raise FileNotFoundError(f"Resource not found: {resource_path}")
+from qtpy.QtCore import QUrl
 
 
 def get_monaco_html():
     """Get Monaco Editor HTML content from Qt resources."""
-    return load_resource_html(":/monaco/dist/index.html")
+    with open(
+        os.path.join(os.path.dirname(__file__), "js_build/index.html"), "r", encoding="utf-8"
+    ) as file:
+        return file.read()
 
 
 def get_monaco_base_url():
     """Get the base URL for Monaco Editor resources."""
-    return QUrl("qrc:/monaco/dist/")
+    return QUrl.fromLocalFile(
+        os.path.join(os.path.dirname(__file__), "js_build/assets")
+    )  # Use local file URL for the js_build directory

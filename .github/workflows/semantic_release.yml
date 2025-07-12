@@ -89,26 +89,25 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.10'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        run: npm run build
-
+      - name: Build JS resources
+        run: |
+            npm run build 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
       - name: Install Python dependencies
         run: |
             pip install ./qtmonaco[dev]
-
-      - name: Build rcc file
+      - name: Copy JS resources
         run: |
-            python ./qtmonaco/generate_rcc.py
+            mkdir -p ./qtmonaco/qtmonaco/js_build
+            cp -r ./dist/* ./qtmonaco/qtmonaco/js_build
 
       - name: Semantic Version Release
         id: release
