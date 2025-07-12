@@ -68,7 +68,7 @@ def create_qrc_content(files: List[str], build_dir: str) -> str:
     for file_path in files:
         file_element = ET.SubElement(qresource, "file")
         # Include build directory in the path
-        full_path = os.path.join("dist", file_path)
+        full_path = os.path.join(build_dir, file_path)
         file_element.text = str(full_path).replace("\\", "/")  # Use forward slashes for Qt
 
     # Pretty print the XML
@@ -107,7 +107,8 @@ def main():
 
     build_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist")
     rcc_build_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "qtmonaco")
-    qrc_file = "monaco_resources.qrc"
+    js_build_dir = os.path.join(rcc_build_dir, "js_build")
+    qrc_file = os.path.join(rcc_build_dir, "monaco_resources.qrc")
     rcc_file = os.path.join(rcc_build_dir, "_monaco_rcc.py")
 
     # Validate build directory
@@ -116,21 +117,26 @@ def main():
         print("Make sure to run 'npm run build' first")
         return 1
 
+    # Copy dist directory to qtmonaco
+    if not os.path.exists(js_build_dir):
+        os.makedirs(js_build_dir, exist_ok=True)
+        os.system(f"cp -r {build_dir}/* {js_build_dir}/")
+
     # Get file list
-    files = get_file_list(build_dir)
+    files = get_file_list(js_build_dir)
 
     if not files:
-        print(f"Warning: No files found in '{build_dir}'")
+        print(f"Warning: No files found in '{js_build_dir}'")
         return 1
 
-    print(f"Found {len(files)} files in '{build_dir}':")
+    print(f"Found {len(files)} files in '{js_build_dir}':")
     for file_path in files[:5]:  # Show first 5 files
         print(f"  {file_path}")
     if len(files) > 5:
         print(f"  ... and {len(files) - 5} more files")
 
     # Generate QRC content
-    qrc_content = create_qrc_content(files, build_dir)
+    qrc_content = create_qrc_content(files, "js_build")
 
     # Write QRC file
     with open(qrc_file, "w", encoding="utf-8") as f:
@@ -138,20 +144,20 @@ def main():
 
     print(f"\n✓ Generated QRC file: {qrc_file}")
 
-    # Compile to RCC
-    print("Compiling to RCC file...")
-    os.makedirs(rcc_build_dir, exist_ok=True)  # Ensure build directory exists
-    if compile_to_rcc(qrc_file, rcc_file):
-        print(f"✓ Generated RCC file: {rcc_file}")
+    # # Compile to RCC
+    # print("Compiling to RCC file...")
+    # os.makedirs(rcc_build_dir, exist_ok=True)  # Ensure build directory exists
+    # if compile_to_rcc(qrc_file, rcc_file):
+    #     print(f"✓ Generated RCC file: {rcc_file}")
 
-        # Clean up QRC file since we only need the RCC
-        os.remove(qrc_file)
-        print("✓ Cleaned up temporary QRC file")
+    #     # Clean up QRC file since we only need the RCC
+    #     os.remove(qrc_file)
+    #     print("✓ Cleaned up temporary QRC file")
 
-        print("\n🎉 Success!")
-        return 0
-    print("✗ Failed to compile RCC file")
-    return 1
+    #     print("\n🎉 Success!")
+    #     return 0
+    # print("✗ Failed to compile RCC file")
+    return 0
 
 
 if __name__ == "__main__":
