@@ -34,6 +34,11 @@ jobs:
       - name: Install Python dependencies
         run: |
             pip install ./qtmonaco
+      - name: Verify PySide6 installation
+        run: |
+            python -c "import PySide6; print(f'PySide6 version: {PySide6.__version__}')"
+            which pyside6-rcc || echo "pyside6-rcc not found in PATH"
+            pyside6-rcc --version || echo "pyside6-rcc command failed"
       - name: Build rcc file
         run: |
             python ./qtmonaco/generate_rcc.py
