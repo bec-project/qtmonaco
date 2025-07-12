@@ -23,17 +23,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.10'
-      - name: Install dependencies
-        run: npm install
-      - name: Build project
-        run: npm run build
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      - name: Install JS dependencies
+        run: npm install
       - name: Install Python dependencies
         run: |
             pip install ./qtmonaco
+      - name: Build project
+        run: npm run build
       - name: Build rcc file
         run: |
             echo "=== Dist directory analysis ==="
@@ -41,6 +41,8 @@ jobs:
             find dist -type f | wc -l
             echo "File sizes:"
             find dist -type f -exec ls -lh {} \; | awk '{print $5, $9}' | sort -hr | head -20
+            echo "=== Exact file list and sizes ==="
+            find dist -type f -exec ls -l {} \; | sort -k9
             echo "=== Generating RCC ==="
             python ./qtmonaco/generate_rcc.py
       - name: Verify generated file
