@@ -30,6 +30,10 @@ jobs:
       - name: Install Python dependencies
         run: |
             pip install -e ./qtmonaco[dev]
+            pip freeze > _installed_requirements.txt
+            echo "=== Installed Python packages ==="
+            cat _installed_requirements.txt
+            echo "=== Installed Python packages (sorted) ==="
       - name: Install JS dependencies
         run: npm install
       - name: Build project
