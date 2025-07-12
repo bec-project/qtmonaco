@@ -35,7 +35,10 @@ jobs:
             cat _installed_requirements.txt
             echo "=== Installed Python packages (sorted) ==="
       - name: Install JS dependencies
-        run: npm install
+        run: |
+            npm ci --verbose
+            echo "=== Installed npm packages ==="
+            npm list --depth=0
       - name: Build project
         run: npm run build
       - name: Build rcc file
