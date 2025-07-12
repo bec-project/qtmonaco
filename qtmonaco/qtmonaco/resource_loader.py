@@ -2,7 +2,11 @@ import os
 
 from qtpy.QtCore import QFile, QIODevice, QResource, QUrl
 
-import qtmonaco._monaco_rcc  # pylint: disable=unused-import
+# Use platform-aware resource loading
+from .platform_resources import ensure_resources_loaded
+
+# Ensure resources are loaded when this module is imported
+ensure_resources_loaded()
 
 
 def load_resource_html(resource_path: str) -> str:

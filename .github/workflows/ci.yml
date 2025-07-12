@@ -11,7 +11,14 @@ jobs:
     uses: ./.github/workflows/check_pr.yml
  
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+    runs-on: ${{ matrix.os }}
     needs: check_pr_status
     if: needs.check_pr_status.outputs.branch-pr == ''
     steps:
@@ -30,40 +37,61 @@ jobs:
       - name: Install Python dependencies
         run: |
             pip install -e ./qtmonaco[dev]
-            pip freeze > _installed_requirements.txt
-            echo "=== Installed Python packages ==="
-            cat _installed_requirements.txt
-            echo "=== Installed Python packages (sorted) ==="
       - name: Install JS dependencies
         run: |
             npm ci --verbose
-            echo "=== Installed npm packages ==="
-            npm list --depth=0
       - name: Build project
         run: npm run build
       - name: Build rcc file
         run: |
-            echo "=== Dist directory analysis ==="
-            echo "Total files in dist:"
-            find dist -type f | wc -l
-            echo "File sizes:"
-            find dist -type f -exec ls -lh {} \; | awk '{print $5, $9}' | sort -hr | head -20
-            echo "=== Exact file list and sizes ==="
-            find dist -type f -exec ls -l {} \; | sort -k9
-            echo "=== Generating RCC ==="
             python ./qtmonaco/generate_rcc.py
-      - name: Verify generated file
+      - name: Rename RCC file for platform
         run: |
-            echo "=== Generated file info ==="
-            ls -la qtmonaco/qtmonaco/_monaco_rcc.py
-            echo "=== File hash (for verification) ==="
-            sha256sum qtmonaco/qtmonaco/_monaco_rcc.py
-            echo "=== Line count comparison ==="
-            wc -l qtmonaco/qtmonaco/_monaco_rcc.py
-      - name: Upload build artifact
+            mv qtmonaco/qtmonaco/_monaco_rcc.py qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
+            echo "=== Generated ${{ matrix.platform }} RCC file ==="
+            ls -la qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
+            wc -l qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
+      - name: Upload platform-specific artifact
         uses: actions/upload-artifact@v4
         with:
-          name: monaco-rcc-file
-          path: qtmonaco/qtmonaco/_monaco_rcc.py
+          name: monaco-rcc-${{ matrix.platform }}
+          path: qtmonaco/qtmonaco/_monaco_rcc_${{ matrix.platform }}.py
+          retention-days: 30
+
+  package:
+    runs-on: ubuntu-latest
+    needs: [check_pr_status, build]
+    if: needs.check_pr_status.outputs.branch-pr == ''
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: monaco-rcc-*
+          merge-multiple: false
+      - name: Combine platform RCC files
+        run: |
+            echo "=== Available platform builds ==="
+            find . -name "_monaco_rcc_*.py" -exec ls -la {} \;
+            echo "=== Copying platform-specific RCC files ==="
+            mkdir -p qtmonaco/qtmonaco/
+            cp monaco-rcc-linux/_monaco_rcc_linux.py qtmonaco/qtmonaco/
+            cp monaco-rcc-macos/_monaco_rcc_macos.py qtmonaco/qtmonaco/
+            echo "=== Final RCC files in package ==="
+            ls -la qtmonaco/qtmonaco/_monaco_rcc_*.py
+      - name: Build Python package
+        run: |
+            pip install build
+            python -m build
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
           retention-days: 30
 
