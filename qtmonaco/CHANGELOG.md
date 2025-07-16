@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.2.1 (2025-07-16)
+
+### Bug Fixes
+
+- Fix js mapping and cleanup
+  ([`97ab296`](https://github.com/bec-project/qtmonaco/commit/97ab296db83b3cde8dc093360272d1f384fd84a2))
+
+### Documentation
+
+- Update readme with public api
+  ([`b6c513f`](https://github.com/bec-project/qtmonaco/commit/b6c513f42bedb8ad006df0aa161c34d838831666))
+
+
 ## v0.2.0 (2025-07-16)
 
 ### Bug Fixes
