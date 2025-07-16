@@ -150,6 +150,15 @@ class EditorBridge(QObject):
         self._connector.send("language", language)
         self.language_changed.emit()
 
+    def set_minimap_enabled(self, enabled: bool):
+        """
+        Enable or disable the minimap in the editor.
+
+        Args:
+            enabled (bool): True to enable the minimap, False to disable it.
+        """
+        self._connector.send("minimap", enabled)
+
     def get_theme(self):
         return self._theme
 
