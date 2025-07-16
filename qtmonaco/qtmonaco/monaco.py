@@ -131,6 +131,15 @@ class Monaco(QWebEngineView):
         self._connector.send("set_text", value)
         self.text_changed.emit(value)
 
+    def get_text(self):
+        """
+        Get the current value in the editor.
+
+        Returns:
+            str: The current value in the editor.
+        """
+        return self._value
+
     def get_language(self):
         return self._language
 
@@ -160,18 +169,6 @@ class Monaco(QWebEngineView):
         """Set the editor to read-only mode."""
         self._connector.send("readonly", read_only)
         self._readonly = read_only
-
-    @property
-    def value(self):
-        return self._value
-
-    @property
-    def language(self):
-        return self._language
-
-    @property
-    def theme(self):
-        return self._theme
 
     def set_cursor(
         self,
