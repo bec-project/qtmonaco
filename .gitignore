@@ -41,6 +41,7 @@ share/python-wheels/
 MANIFEST
 *_rcc.py
 node_modules
+**/js_build
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
