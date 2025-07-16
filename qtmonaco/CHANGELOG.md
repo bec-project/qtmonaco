@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.2.3 (2025-07-16)
+
+### Bug Fixes
+
+- Add get_text method to retrieve current editor value; cleanup properties
+  ([`24bb58a`](https://github.com/bec-project/qtmonaco/commit/24bb58a7b57132037e0d4d4460d8cf6c14426fce))
+
+
 ## v0.2.2 (2025-07-16)
 
 ### Bug Fixes
