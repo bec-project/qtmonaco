@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.2.0 (2025-07-16)
+
+### Bug Fixes
+
+- Fix js interface
+  ([`5a32eec`](https://github.com/bec-project/qtmonaco/commit/5a32eec78440ff9b9abb73a2ae53aa5f47494f09))
+
+### Features
+
+- Add method to enable / disable the minimap
+  ([`d89b6a8`](https://github.com/bec-project/qtmonaco/commit/d89b6a84c8ba6e68e99dca65b5567d289e00848b))
+
+
 ## v0.1.6 (2025-07-16)
 
 ### Bug Fixes
