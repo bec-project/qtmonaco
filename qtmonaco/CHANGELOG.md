@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.6 (2025-07-16)
+
+### Bug Fixes
+
+- Build js artifacts and include them in the release
+  ([`8d5df31`](https://github.com/bec-project/qtmonaco/commit/8d5df31bbf1907a300a259c7d99869ba78032254))
+
+
 ## v0.1.5 (2025-07-11)
 
 ### Bug Fixes
