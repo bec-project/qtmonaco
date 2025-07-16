@@ -83,6 +83,14 @@ function updateFromPython(name: string, value: string) {
       const currentValue = editor.getValue();
       sendToPython("_current_text", currentValue); // Send back the current value
       break;
+    case "minimap":
+      // Set the minimap visibility
+      editor.updateOptions({
+        minimap: {
+          enabled: data === true, // Enable minimap if data is true
+        },
+      });
+      break;
     case "set_cursor": {
       // Set the cursor position in the editor
       const position = data; // Assuming data is an object with line and column properties
