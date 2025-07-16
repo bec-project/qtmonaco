@@ -85,9 +85,11 @@ function updateFromPython(name: string, value: string) {
       break;
     case "minimap":
       // Set the minimap visibility
+      const isMinimapEnabled = data === true; // Assuming data is a boolean
+      console.log(`Setting minimap enabled: ${isMinimapEnabled}`);
       editor.updateOptions({
         minimap: {
-          enabled: data === true, // Enable minimap if data is true
+          enabled: isMinimapEnabled,
         },
       });
       break;

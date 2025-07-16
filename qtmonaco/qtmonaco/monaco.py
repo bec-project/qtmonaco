@@ -1,10 +1,11 @@
+import json
 from typing import Literal
 
 from qtpy.QtCore import Signal
 from qtpy.QtWebChannel import QWebChannel
 from qtpy.QtWebEngineWidgets import QWebEngineView
 
-from qtmonaco.editor_bridge import EditorBridge
+from qtmonaco.connector import Connector
 from qtmonaco.monaco_page import MonacoPage
 from qtmonaco.resource_loader import get_monaco_base_url, get_monaco_html
 
@@ -29,33 +30,43 @@ def get_pylsp_host() -> str:
 
 class Monaco(QWebEngineView):
     initialized = Signal()
-    textChanged = Signal(str)
+    text_changed = Signal(str)
+    language_changed = Signal(str)
+    theme_changed = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         self.pylsp_host = get_pylsp_host()
+        self._connector = Connector(parent=self)
+        self._value = ""
+        self._language = ""
+        self._theme = ""
+        self._readonly = False
+        self._current_cursor = {"line": 1, "column": 1}
+        self._initialized = False
+        self._buffer = []
 
-        self._setup_page()
-        self._setup_bridge()
-        self._load_editor()
-
-    def _setup_page(self):
-        """Initialize the web engine page."""
         page = MonacoPage(parent=self)
         self.setPage(page)
 
-    def _setup_bridge(self):
-        """Initialize the bridge for communication with JavaScript."""
         self._channel = QWebChannel(self)
-        self._bridge = EditorBridge()
-
         self.page().setWebChannel(self._channel)
-        self._channel.registerObject("connector", self._bridge._connector)
+        self._channel.registerObject("connector", self._connector)
+        self._connector.javascript_data_received.connect(self.on_new_data_received)
 
-        self._bridge.initialized.connect(self._set_host)
-        self._bridge.initialized.connect(self.initialized)
-        self._bridge.text_changed.connect(lambda: self.textChanged.emit(self._bridge.value))
+        self.initialized.connect(lambda: self._set_host(self.pylsp_host))
+        self._load_editor()
+
+    @property
+    def bridge_initialized(self):
+        return self._initialized
+
+    @bridge_initialized.setter
+    def bridge_initialized(self, value):
+        if self._initialized != value:
+            self._initialized = value
+            self.initialized.emit()
 
     def _load_editor(self):
         """Load the Monaco Editor HTML content."""
@@ -63,16 +74,104 @@ class Monaco(QWebEngineView):
         base_url = get_monaco_base_url()
         self.setHtml(raw_html, base_url)
 
-    def _set_host(self):
-        """Set the LSP host once the bridge is initialized."""
-        self._bridge.set_host(self.pylsp_host)
+    def _set_host(self, host: str):
+        """
+        Set the LSP host once the bridge is initialized.
 
-    # Public API methods
-    def text(self):
-        return self._bridge.value
+        Args:
+            host (str): The host URL for the editor.
+        """
+        self._connector.send("lsp_url", host)
 
-    def set_text(self, text: str):
-        self._bridge.set_text(text)
+    def on_new_data_received(self, name: str, value: str):
+        """
+        Handle new data received from JavaScript.
+        This method is called when the JavaScript side sends data to the Python side.
+        """
+        data = json.loads(value)
+        if hasattr(self, name):
+            method = getattr(self, name)
+            if callable(method):
+                method(data)
+                return
+            if hasattr(self, name):
+                setattr(self, name, data)
+                return
+        else:
+            print(f"Warning: No method or property named '{name}' in EditorBridge.")
+
+    def on_value_changed(self, value):
+        """Handle value changes from the JavaScript side."""
+        self._current_text(value)
+
+    def _current_text(self, value: str):
+        if self._value == value:
+            return
+        self._value = value
+        self.text_changed.emit(value)
+
+    ##########################
+    ### Public API Methods ###
+    ##########################
+
+    def set_text(self, value: str):
+        """
+        Set the value in the editor.
+
+        Args:
+            value (str): The new value to set in the editor.
+        """
+        if self._value == value:
+            return
+        if self._readonly:
+            raise ValueError("Editor is in read-only mode, cannot set value.")
+        if not isinstance(value, str):
+            raise TypeError("Value must be a string.")
+        self._value = value
+        self._connector.send("set_text", value)
+        self.text_changed.emit(value)
+
+    def get_language(self):
+        return self._language
+
+    def set_language(self, language):
+        self._language = language
+        self._connector.send("language", language)
+        self.language_changed.emit(language)
+
+    def set_minimap_enabled(self, enabled: bool):
+        """
+        Enable or disable the minimap in the editor.
+
+        Args:
+            enabled (bool): True to enable the minimap, False to disable it.
+        """
+        self._connector.send("minimap", enabled)
+
+    def get_theme(self):
+        return self._theme
+
+    def set_theme(self, theme):
+        self._theme = theme
+        self._connector.send("theme", theme)
+        self.theme_changed.emit(theme)
+
+    def set_readonly(self, read_only: bool):
+        """Set the editor to read-only mode."""
+        self._connector.send("readonly", read_only)
+        self._readonly = read_only
+
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def language(self):
+        return self._language
+
+    @property
+    def theme(self):
+        return self._theme
 
     def set_cursor(
         self,
@@ -80,44 +179,21 @@ class Monaco(QWebEngineView):
         column: int = 1,
         move_to_position: Literal[None, "center", "top", "position"] = None,
     ):
-        """Set the cursor position in the editor.
+        """
+        Set the cursor position in the editor.
 
         Args:
-            line (int): Line number (1-based)
-            column (int): Column number (1-based), defaults to 1
+            line (int): Line number (1-based).
+            column (int): Column number (1-based), defaults to 1.
+            move_to_position (Literal[None, "center", "top", "position"], optional): Position to move the cursor to.
         """
-        self._bridge.set_cursor(line, column, move_to_position)
+        self._connector.send(
+            "set_cursor", {"line": line, "column": column, "moveToPosition": move_to_position}
+        )
 
-    def get_language(self) -> str:
-        """Get the current programming language for syntax highlighting in the editor."""
-        return self._bridge.get_language()
-
-    def set_language(self, language: str):
-        """Set the programming language for syntax highlighting in the editor.
-
-        Args:
-            language (str): The programming language to set (e.g., "python", "javascript").
-        """
-        self._bridge.set_language(language)
-
-    def get_theme(self):
-        return self._bridge.get_theme()
-
-    def set_theme(self, theme: str):
-        """Set the theme for the Monaco editor.
-
-        Args:
-            theme (str): The theme to apply (e.g., "vs", "vs-dark").
-        """
-        self._bridge.set_theme(theme)
-
-    def set_read_only(self, read_only: bool):
-        """Set the editor to read-only mode."""
-        self._bridge.set_readonly(read_only)
-
-    def shutdown(self):
-        if hasattr(self._bridge, "shutdown"):
-            self._bridge.shutdown()
+    @property
+    def current_cursor(self):
+        return self._current_cursor
 
 
 if __name__ == "__main__":
@@ -130,5 +206,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     editor = Monaco()
+    editor.set_minimap_enabled(False)
     editor.show()
     sys.exit(app.exec_())
