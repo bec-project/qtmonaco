@@ -72,7 +72,7 @@ function updateFromPython(name: string, value: string) {
   const data = JSON.parse(value);
   console.log(`Received update from Python: ${name} =`, data);
   switch (name) {
-    case "value":
+    case "set_text":
       const model = editor.getModel();
       if (model) {
         model.setValue(data);
@@ -105,7 +105,7 @@ function updateFromPython(name: string, value: string) {
             editor.revealPosition(newPosition); // Ensure the cursor is visible
           }
         }
-        sendToPython("setCursor", { line: lineNumber, column: column }); // Send back the new cursor position
+        sendToPython("_current_cursor", { line: lineNumber, column: column }); // Send back the new cursor position
       }
       break;
     }
@@ -126,18 +126,13 @@ function updateFromPython(name: string, value: string) {
       try {
         monaco.editor.setTheme(data);
         console.log(`Applied theme: ${data}`);
-        sendToPython("theme", data); // Send back the theme name
+        sendToPython("_theme", data); // Send back the theme name
       } catch (error) {
         console.warn(`Failed to apply theme "${data}":`, error);
         // Fallback to default theme
         monaco.editor.setTheme("vs-dark");
-        sendToPython("theme", "vs-dark");
+        sendToPython("_theme", "vs-dark");
       }
-      break;
-    case "get_themes":
-      // Return list of available themes
-      const availableThemes = ["vs", "vs-dark", "hc-black"]; // Default Monaco themes
-      sendToPython("available_themes", availableThemes);
       break;
     case "lsp_url":
       // Destroy existing LSP client if it exists

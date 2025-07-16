@@ -52,7 +52,8 @@ class Connector(QObject):
         This method is called when the JavaScript side sends data to the Python side.
         Args:
 
-
+            name (str): The name of the data being received.
+            value (str): The value being received, which is expected to be a JSON string.
         """
         self.javascript_data_received.emit(name, value)
 
@@ -82,6 +83,7 @@ class EditorBridge(QObject):
         self._language = ""
         self._theme = ""
         self._readonly = False
+        self._current_cursor = {"line": 1, "column": 1}
         self._initialized = False
         self._buffer = []
         self.initialized.connect(self._connector.set_initialized)
@@ -137,6 +139,7 @@ class EditorBridge(QObject):
         if not isinstance(value, str):
             raise TypeError("Value must be a string.")
         self._value = value
+        self._connector.send("set_text", value)
         self.text_changed.emit()
 
     def get_language(self):
@@ -198,3 +201,7 @@ class EditorBridge(QObject):
         self._connector.send(
             "set_cursor", {"line": line, "column": column, "moveToPosition": move_to_position}
         )
+
+    @property
+    def current_cursor(self):
+        return self._current_cursor
