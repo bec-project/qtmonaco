@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qtmonaco"
-version = "0.2.1"
+version = "0.2.2"
 description = "Qt Monaco is a Python library for working with the Monaco Editor in Qt applications."
 requires-python = ">=3.10"
 classifiers = [

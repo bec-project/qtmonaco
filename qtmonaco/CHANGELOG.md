@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.2.2 (2025-07-16)
+
+### Bug Fixes
+
+- Set js log to debugging
+  ([`23301e1`](https://github.com/bec-project/qtmonaco/commit/23301e15d12a3d6b19f8571c5d492da62cca5472))
+
+
 ## v0.2.1 (2025-07-16)
 
 ### Bug Fixes
