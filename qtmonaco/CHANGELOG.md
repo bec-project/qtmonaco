@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.3.0 (2025-07-17)
+
+### Features
+
+- Add line highlighting feature
+  ([`da269af`](https://github.com/bec-project/qtmonaco/commit/da269af11e450c33c610b7f7f34d5aec5a97d227))
+
+
 ## v0.2.3 (2025-07-16)
 
 ### Bug Fixes
