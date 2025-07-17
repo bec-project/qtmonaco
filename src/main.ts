@@ -18,6 +18,8 @@ let bridge: any = null;
 
 let lspClient: LspClient | null = null;
 
+let decorationsCollection: monaco.editor.IEditorDecorationsCollection | null = null;
+
 // Define init function
 function init() {
   // Add any initialization code here if needed
@@ -119,6 +121,30 @@ function updateFromPython(name: string, value: string) {
       }
       break;
     }
+    case "highlight_lines":
+      // Highlight a range of lines in the editor
+      const highlight = data; // Expecting data with start and end line numbers
+      const highlightRange = new monaco.Range(highlight.start, 1, highlight.end, 1);
+      if (decorationsCollection) {
+        decorationsCollection.clear(); // Clear previous decorations if any
+      } else {
+        decorationsCollection = editor.createDecorationsCollection(); // Create a new collection if it doesn't exist
+      }
+      const highlightDecoration = {
+        range: highlightRange,
+        options: {
+          isWholeLine: true,
+          linesDecorationsClassName: "highlighted-line",
+        },
+      };
+      decorationsCollection.set([highlightDecoration]);
+      break;
+    case "remove_highlight":
+      // Remove the highlight from the editor
+      if (decorationsCollection) {
+        decorationsCollection.clear(); // Clear all decorations
+      }
+      break;
     case "readonly":
       // Set the editor to read-only mode
       const isReadOnly = data === true;

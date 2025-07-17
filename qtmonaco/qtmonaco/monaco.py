@@ -192,6 +192,23 @@ class Monaco(QWebEngineView):
     def current_cursor(self):
         return self._current_cursor
 
+    def set_highlighted_lines(self, start_line: int, end_line: int):
+        """
+        Highlight a range of lines in the editor.
+
+        Args:
+            start_line (int): The starting line number (1-based).
+            end_line (int): The ending line number (1-based).
+        """
+        self._connector.send("highlight_lines", {"start": start_line, "end": end_line})
+
+    def clear_highlighted_lines(self):
+        """
+        Clear any highlighted lines in the editor.
+        This method sends a command to the JavaScript side to clear the highlights.
+        """
+        self._connector.send("remove_highlight", {})
+
 
 if __name__ == "__main__":
     import logging
