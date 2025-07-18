@@ -37,12 +37,12 @@ Homepage = "https://github.com/bec-project/qtmonaco"
 [tool.hatch.build.targets.wheel]
 ignore-vcs = true
 include = ["**/*"]
-exclude = ["docs/**", "tests/**"]
+exclude = ["docs/**", "tests/**", "backend/**"]
 
 [tool.hatch.build.targets.sdist]
 ignore-vcs = true
 include = ["**/*"]
-exclude = ["docs/**", "tests/**"]
+exclude = ["docs/**", "tests/**", "backend/**"]
 
 [tool.black]
 line-length = 100
