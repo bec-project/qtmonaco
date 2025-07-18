@@ -24,10 +24,13 @@ jobs:
         with:
           node-version: '22.10'
       - name: Install dependencies
-        run: npm install
+        run: | 
+          cd backend
+          npm install
 
       - name: Build JS resources
         run: |
+            cd backend
             npm run build 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -35,14 +38,53 @@ jobs:
           python-version: '3.11'
       - name: Install Python dependencies
         run: |
-            pip install ./qtmonaco[dev]
+            pip install .[dev]
       - name: Copy JS resources
         run: |
-            mkdir -p ./qtmonaco/qtmonaco/js_build
-            cp -r ./dist/* ./qtmonaco/qtmonaco/js_build
-      - name: Build python wheel 
+            mkdir -p ./qtmonaco/js_build
+            cp -r ./backend/dist/* ./qtmonaco/js_build
+      - name: Build python wheel
         run: |
-            cd qtmonaco
             pip install wheel build
             python -m build
 
+      - name: Upload js build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: qtmonaco-js
+          path: ./qtmonaco/js_build
+          retention-days: 1
+
+  pytest:
+      env:
+        QTWEBENGINE_DISABLE_SANDBOX: 1
+        QT_QPA_PLATFORM: "offscreen"
+      runs-on: ubuntu-latest
+      needs: build
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.11'
+        - name: Install os dependencies
+          shell: bash
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y libgl1 libegl1 x11-utils libxkbcommon-x11-0 libdbus-1-3 xvfb
+            sudo apt-get -y install libnss3 libxdamage1 libasound2t64 libatomic1 libxcursor1
+        - name: Download js build artifacts
+          uses: actions/download-artifact@v4
+          with:
+            name: qtmonaco-js
+            path: ./qtmonaco/js_build
+        - name: Install Python dependencies
+          run: |
+              ls -la ./qtmonaco/js_build
+              pip install .[dev]
+        - name: Run Pytest with Coverage
+          id: coverage
+          run: pytest --random-order --cov=qtmonaco --cov-config=pyproject.toml --cov-branch --cov-report=xml --no-cov-on-fail tests/

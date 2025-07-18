@@ -92,10 +92,13 @@ jobs:
           node-version: '22.10'
 
       - name: Install dependencies
-        run: npm install
+        run: | 
+          cd backend
+          npm install
 
       - name: Build JS resources
         run: |
+            cd backend
             npm run build 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -103,18 +106,17 @@ jobs:
           python-version: '3.11'
       - name: Install Python dependencies
         run: |
-            pip install ./qtmonaco[dev]
+            pip install .[dev]
       - name: Copy JS resources
         run: |
-            mkdir -p ./qtmonaco/qtmonaco/js_build
-            cp -r ./dist/* ./qtmonaco/qtmonaco/js_build
+            mkdir -p ./qtmonaco/js_build
+            cp -r ./backend/dist/* ./qtmonaco/js_build
 
       - name: Semantic Version Release
         id: release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd qtmonaco
           pip install python-semantic-release==9.* wheel build twine
           semantic-release -vv version
           if [ ! -d dist ]; then echo No release will be made; exit 0; fi
