@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.4.1 (2025-07-18)
+
+### Bug Fixes
+
+- Remove backend from build
+  ([`cc38340`](https://github.com/bec-project/qtmonaco/commit/cc3834088ae08d659e98bdd75dd091a8dc1c471a))
+
+
 ## v0.4.0 (2025-07-18)
 
 ### Features
