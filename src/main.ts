@@ -1,5 +1,6 @@
 import * as monaco from "monaco-editor";
 import LspClient from "./lsp";
+import { initVimMode } from "monaco-vim";
 
 const container = document.getElementById("container");
 if (!container) {
@@ -12,6 +13,8 @@ const editor = monaco.editor.create(container, {
   automaticLayout: true,
   theme: "vs-dark",
 });
+
+let vimMode: any = null;
 
 // Build qt bridge
 let bridge: any = null;
@@ -181,6 +184,21 @@ function updateFromPython(name: string, value: string) {
         const pylspUrl = data;
         console.log(`Setting up LSP client with URL: ${pylspUrl}`);
         lspClient = new LspClient(pylspUrl);
+      }
+      break;
+    case "vim_mode":
+      // Enable or disable Vim mode
+      if (data === true) {
+        if (!vimMode) {
+          vimMode = initVimMode(editor, null);
+          console.log("Vim mode enabled");
+        }
+      } else {
+        if (vimMode) {
+          vimMode.dispose(); // Dispose Vim mode if it exists
+          vimMode = null;
+          console.log("Vim mode disabled");
+        }
       }
       break;
   }

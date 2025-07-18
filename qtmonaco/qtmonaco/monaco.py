@@ -209,6 +209,15 @@ class Monaco(QWebEngineView):
         """
         self._connector.send("remove_highlight", {})
 
+    def set_vim_mode_enabled(self, enabled: bool):
+        """
+        Enable or disable Vim mode in the editor.
+
+        Args:
+            enabled (bool): True to enable Vim mode, False to disable it.
+        """
+        self._connector.send("vim_mode", enabled)
+
 
 if __name__ == "__main__":
     import logging
