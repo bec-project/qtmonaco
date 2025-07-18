@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.4.0 (2025-07-18)
+
+### Features
+
+- **vim**: Add vim mode
+  ([`e870c83`](https://github.com/bec-project/qtmonaco/commit/e870c832de256729b6c1ec1fcc80e11618dc54ff))
+
+### Refactoring
+
+- Restructure repo
+  ([`89e49cb`](https://github.com/bec-project/qtmonaco/commit/89e49cbd526fb7d2783fe3307d1de296a166e5af))
+
+
 ## v0.3.0 (2025-07-17)
 
 ### Features
