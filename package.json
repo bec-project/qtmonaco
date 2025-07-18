@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "monaco-languageclient": "^9.8.0",
+    "monaco-vim": "^0.4.2",
     "vscode-jsonrpc": "^8.2.1",
     "vscode-ws-jsonrpc": "^3.4.0"
   }
