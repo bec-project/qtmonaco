@@ -155,7 +155,16 @@ class Monaco(QWebEngineView):
         Args:
             enabled (bool): True to enable the minimap, False to disable it.
         """
-        self._connector.send("minimap", enabled)
+        self._connector.send("update_options", {"minimap": {"enabled": enabled}})
+
+    def set_whitespace_visible(self, visible: bool):
+        """
+        Set whether whitespace characters are visible in the editor.
+
+        Args:
+            visible (bool): True to show whitespace characters, False to hide them.
+        """
+        self._connector.send("update_options", {"renderWhitespace": "all" if visible else "none"})
 
     def get_theme(self):
         return self._theme
@@ -229,6 +238,8 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     editor = Monaco()
+    editor.set_language("python")
     editor.set_minimap_enabled(False)
+    editor.set_whitespace_visible(True)
     editor.show()
     sys.exit(app.exec_())
