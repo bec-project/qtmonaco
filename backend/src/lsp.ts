@@ -327,10 +327,129 @@ class LspClient {
       },
     });
 
+    // Setup diagnostic/linting support
+    this.setupDiagnostics();
+
     // Store disposables for cleanup
     this.providerDisposables.push(completionProvider, signatureProvider, hoverProvider);
     this.providersRegistered = true;
     console.log("Monaco language providers registered successfully");
+  }
+
+  private setupDiagnostics() {
+    const connection = this.currentConnection;
+    if (!this.isConnectionValid(connection)) {
+      console.warn("No valid LSP connection available for diagnostics setup");
+      return;
+    }
+
+    const validConnection = connection!;
+
+    // Listen for diagnostic notifications from the LSP server
+    const diagnosticDisposable = validConnection.onNotification("textDocument/publishDiagnostics", (params: any) => {
+      try {
+        const { uri, diagnostics } = params;
+
+        // Convert LSP diagnostics to Monaco markers
+        const markers: monaco.editor.IMarkerData[] = diagnostics.map((diagnostic: any) => {
+          let severity: monaco.MarkerSeverity;
+
+          // Map LSP diagnostic severity to Monaco marker severity
+          switch (diagnostic.severity) {
+            case 1: // Error
+              severity = monaco.MarkerSeverity.Error;
+              break;
+            case 2: // Warning
+              severity = monaco.MarkerSeverity.Warning;
+              break;
+            case 3: // Information
+              severity = monaco.MarkerSeverity.Info;
+              break;
+            case 4: // Hint
+              severity = monaco.MarkerSeverity.Hint;
+              break;
+            default:
+              severity = monaco.MarkerSeverity.Error;
+          }
+
+          return {
+            severity,
+            message: diagnostic.message,
+            startLineNumber: diagnostic.range.start.line + 1, // Monaco uses 1-based line numbers
+            startColumn: diagnostic.range.start.character + 1, // Monaco uses 1-based column numbers
+            endLineNumber: diagnostic.range.end.line + 1,
+            endColumn: diagnostic.range.end.character + 1,
+            source: diagnostic.source || "pylsp",
+            code: diagnostic.code ? String(diagnostic.code) : undefined,
+          };
+        });
+
+        // Find the model for this URI and set markers
+        const models = monaco.editor.getModels();
+        const model = models.find((m) => m.uri.toString() === uri);
+
+        if (model) {
+          monaco.editor.setModelMarkers(model, "pylsp", markers);
+          console.log(`Set ${markers.length} diagnostic markers for ${uri}`);
+        } else {
+          console.warn(`No model found for URI: ${uri}`);
+        }
+      } catch (e) {
+        console.error("Failed to process diagnostics:", e);
+      }
+    });
+
+    // Store the diagnostic disposable for cleanup
+    this.providerDisposables.push(diagnosticDisposable);
+
+    console.log("Diagnostic support setup completed");
+  }
+
+  public requestDiagnostics(model: monaco.editor.ITextModel) {
+    const connection = this.currentConnection;
+    if (!this.isConnectionValid(connection)) {
+      console.warn("No valid LSP connection available for diagnostics request");
+      return;
+    }
+
+    const validConnection = connection!;
+    const uri = model.uri.toString();
+
+    try {
+      // Send didOpen notification to ensure the server has the latest content
+      validConnection.sendNotification("textDocument/didOpen", {
+        textDocument: {
+          uri,
+          languageId: "python",
+          version: 1,
+          text: model.getValue(),
+        },
+      });
+
+      // Send didChange notification to trigger diagnostics
+      validConnection.sendNotification("textDocument/didChange", {
+        textDocument: {
+          uri,
+          version: 2,
+        },
+        contentChanges: [
+          {
+            text: model.getValue(),
+          },
+        ],
+      });
+
+      console.log(`Requested diagnostics for ${uri}`);
+    } catch (e) {
+      console.error("Failed to request diagnostics:", e);
+
+      // Check if the error indicates a disposed connection
+      if (e instanceof Error && (e.message.includes("disposed") || e.message.includes("closed"))) {
+        console.warn("Connection was disposed during diagnostics request, forcing reconnection");
+        this.currentConnection = null;
+        this.forceReconnect();
+      }
+    }
   }
 
   private isConnectionValid(connection: MessageConnection | null): boolean {
