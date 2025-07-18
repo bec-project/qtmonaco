@@ -1,6 +1,6 @@
 import * as monaco from "monaco-editor";
 import LspClient from "./lsp";
-import { initVimMode } from "monaco-vim";
+import { initVimMode, type CMAdapter } from "monaco-vim";
 
 const container = document.getElementById("container");
 if (!container) {
@@ -14,7 +14,14 @@ const editor = monaco.editor.create(container, {
   theme: "vs-dark",
 });
 
-let vimMode: any = null;
+(window as any).qtmonaco = {
+  editor: editor,
+  monaco: monaco,
+  vimMode: null as CMAdapter | null,
+  initialized: false,
+};
+
+let qtmonaco = (window as any).qtmonaco;
 
 // Build qt bridge
 let bridge: any = null;
@@ -28,6 +35,7 @@ function init() {
   // Add any initialization code here if needed
   console.log("Editor initialized");
   sendToPython("bridge_initialized", true);
+  qtmonaco.initialized = true;
 }
 
 // Declare QWebChannel for TypeScript
@@ -189,14 +197,14 @@ function updateFromPython(name: string, value: string) {
     case "vim_mode":
       // Enable or disable Vim mode
       if (data === true) {
-        if (!vimMode) {
-          vimMode = initVimMode(editor, null);
+        if (!qtmonaco.vimMode) {
+          qtmonaco.vimMode = initVimMode(editor, null);
           console.log("Vim mode enabled");
         }
       } else {
-        if (vimMode) {
-          vimMode.dispose(); // Dispose Vim mode if it exists
-          vimMode = null;
+        if (qtmonaco.vimMode) {
+          qtmonaco.vimMode.dispose(); // Dispose Vim mode if it exists
+          qtmonaco.vimMode = null;
           console.log("Vim mode disabled");
         }
       }
