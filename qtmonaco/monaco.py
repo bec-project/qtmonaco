@@ -140,6 +140,34 @@ class Monaco(QWebEngineView):
         """
         return self._value
 
+    def insert_text(self, text: str, line: int | None = None, column: int | None = None):
+        """
+        Insert text at the current cursor position.
+
+        Args:
+            text (str): The text to insert.
+        """
+        if self._readonly:
+            raise ValueError("Editor is in read-only mode, cannot insert text.")
+        if not isinstance(text, str):
+            raise TypeError("Text must be a string.")
+        if line is not None and column is None:
+            column = 1  # Default to column 1 if not provided
+        elif column is not None and line is None:
+            raise ValueError("Column must be provided if line is specified.")
+        self._connector.send("insert", {"text": text, "line": line, "column": column})
+
+    def delete_line(self, line: int | None = None):
+        """
+        Delete a specific line in the editor.
+
+        Args:
+            line (int | None): The line number to delete (1-based). If None, deletes the current line.
+        """
+        if self._readonly:
+            raise ValueError("Editor is in read-only mode, cannot delete line.")
+        self._connector.send("delete_line", line if line is not None else "current")
+
     def get_language(self):
         return self._language
 

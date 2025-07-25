@@ -84,9 +84,9 @@ function sendToPython(name: string, value: any) {
 function updateFromPython(name: string, value: string) {
   const data = JSON.parse(value);
   console.log(`Received update from Python: ${name} =`, data);
+  const model = editor.getModel();
   switch (name) {
     case "set_text":
-      const model = editor.getModel();
       if (model) {
         model.setValue(data);
       }
@@ -109,7 +109,6 @@ function updateFromPython(name: string, value: string) {
     case "set_cursor": {
       // Set the cursor position in the editor
       const position = data; // Assuming data is an object with line and column properties
-      const model = editor.getModel();
       if (model) {
         const lineNumber = position.line || 1; // Default to line 1 if not provided
         const column = position.column || 1; // Default to column 1 if not provided
@@ -154,6 +153,47 @@ function updateFromPython(name: string, value: string) {
       // Remove the highlight from the editor
       if (decorationsCollection) {
         decorationsCollection.clear(); // Clear all decorations
+      }
+      break;
+    case "delete_line":
+      // Delete a specific line in the editor
+      if (!model) break;
+      let lineToDelete: number | null = null;
+      if (typeof data === "number") {
+        lineToDelete = data; // If data is a number, use it directly
+      } else if (data === "current") {
+        const position = editor.getPosition();
+        if (position) {
+          lineToDelete = position.lineNumber; // Use the current line number
+        }
+      } else {
+        console.warn("Invalid data for delete_line, expected a line number or 'current'");
+        break;
+      }
+      if (lineToDelete !== null) {
+        const lineRange = model.getLineContent(lineToDelete);
+        const range = new monaco.Range(lineToDelete, 1, lineToDelete, lineRange.length + 1);
+        const editOperation = { range: range, text: "" }; // Replace with empty string to delete
+        model.pushEditOperations([], [editOperation], () => null); // Apply the edit operation
+      }
+      break;
+    case "insert":
+      // Insert text at the specified position
+      if (!model) break;
+      let position = null;
+      if (data.line !== null) {
+        position = new monaco.Position(data.line, data.column || 1);
+      } else {
+        position = editor.getPosition(); // Use current cursor position if no line is specified
+      }
+
+      if (position) {
+        const insertText = data.text || ""; // Default to empty string if no text provided
+        const editOperation = {
+          range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+          text: insertText,
+        };
+        model.pushEditOperations([], [editOperation], () => null); // Apply the edit operation
       }
       break;
     case "readonly":
