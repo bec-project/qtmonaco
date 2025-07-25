@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.5.0 (2025-07-25)
+
+### Features
+
+- Add options to insert and delete lines
+  ([`4143473`](https://github.com/bec-project/qtmonaco/commit/414347364a69622e852f7bd55482f8c7e525b437))
+
+- **lsp**: Add option to set a hidden header
+  ([`60cb2e9`](https://github.com/bec-project/qtmonaco/commit/60cb2e97069d15bf6023f856347a385f09410136))
+
+
 ## v0.4.1 (2025-07-18)
 
 ### Bug Fixes
