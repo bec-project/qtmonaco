@@ -22,6 +22,7 @@ class LspClient {
   private isDestroyed = false;
   private healthCheckInterval: number | null = null;
   private webSocket: WebSocket | null = null;
+  public prependedData: string | null = null; // Data to prepend to the model content
 
   constructor(pylspUrl: string = "localhost:1234") {
     this.pylspUrl = pylspUrl;
@@ -113,6 +114,10 @@ class LspClient {
     });
   }
 
+  private prependModelData(model: monaco.editor.ITextModel) {
+    return this.prependedData ? this.prependedData + model.getValue() : model.getValue();
+  }
+
   private registerMonacoProviders() {
     // Dispose existing providers first
     if (this.providersRegistered) {
@@ -137,15 +142,21 @@ class LspClient {
         const validConnection = connection!;
 
         const uri = model.uri.toString();
-        const line = position.lineNumber - 1;
+        let line = position.lineNumber - 1;
         const character = position.column - 1;
+
+        // add the length of the prepended data to the line
+        if (this.prependedData) {
+          const prependedLines = this.prependedData.split("\n").length - 1;
+          line += prependedLines; // Adjust line number based on prepended data
+        }
 
         validConnection.sendNotification("textDocument/didOpen", {
           textDocument: {
             uri,
             languageId: "python",
             version: 1,
-            text: model.getValue(),
+            text: this.prependModelData(model),
           },
         });
 
@@ -201,15 +212,21 @@ class LspClient {
         const validConnection = connection!;
 
         const uri = model.uri.toString();
-        const line = position.lineNumber - 1;
+        let line = position.lineNumber - 1;
         const character = position.column - 1;
+
+        // add the length of the prepended data to the line
+        if (this.prependedData) {
+          const prependedLines = this.prependedData.split("\n").length - 1;
+          line += prependedLines; // Adjust line number based on prepended data
+        }
 
         validConnection.sendNotification("textDocument/didOpen", {
           textDocument: {
             uri,
             languageId: "python",
             version: 1,
-            text: model.getValue(),
+            text: this.prependModelData(model),
           },
         });
 
@@ -286,15 +303,21 @@ class LspClient {
         const validConnection = connection!;
 
         const uri = model.uri.toString();
-        const line = position.lineNumber - 1;
+        let line = position.lineNumber - 1;
         const character = position.column - 1;
+
+        // add the length of the prepended data to the line
+        if (this.prependedData) {
+          const prependedLines = this.prependedData.split("\n").length - 1;
+          line += prependedLines; // Adjust line number based on prepended data
+        }
 
         validConnection.sendNotification("textDocument/didOpen", {
           textDocument: {
             uri,
             languageId: "python",
             version: 1,
-            text: model.getValue(),
+            text: this.prependModelData(model),
           },
         });
 

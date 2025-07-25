@@ -27,6 +27,7 @@ let qtmonaco = (window as any).qtmonaco;
 let bridge: any = null;
 
 let lspClient: LspClient | null = null;
+let lspHeader: string | null = null;
 
 let decorationsCollection: monaco.editor.IEditorDecorationsCollection | null = null;
 
@@ -232,7 +233,20 @@ function updateFromPython(name: string, value: string) {
         const pylspUrl = data;
         console.log(`Setting up LSP client with URL: ${pylspUrl}`);
         lspClient = new LspClient(pylspUrl);
+        lspClient.prependedData = lspHeader || ""; // Set the LSP header if available
       }
+      break;
+    case "set_lsp_header":
+      // Set the LSP header for the client
+      lspHeader = data; // Store the header for later use
+      if (lspClient) {
+        lspClient.prependedData = data;
+      }
+      break;
+    case "get_lsp_header":
+      // Get the current LSP header
+      const headerData = lspClient ? lspClient.prependedData : "";
+      sendToPython("_lsp_header", headerData);
       break;
     case "vim_mode":
       // Enable or disable Vim mode
