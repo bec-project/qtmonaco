@@ -45,6 +45,7 @@ class Monaco(QWebEngineView):
         self._readonly = False
         self._current_cursor = {"line": 1, "column": 1}
         self._initialized = False
+        self._lsp_header = ""
         self._buffer = []
 
         page = MonacoPage(parent=self)
@@ -245,6 +246,28 @@ class Monaco(QWebEngineView):
             enabled (bool): True to enable Vim mode, False to disable it.
         """
         self._connector.send("vim_mode", enabled)
+
+    def set_lsp_header(self, header: str):
+        """
+        Set the LSP header to be prepended to the document.
+        Args:
+            header (str): The header text to prepend.
+        """
+        if not isinstance(header, str):
+            raise TypeError("Header must be a string.")
+        header = header.strip()
+        if not header.endswith("\n"):
+            header += "\n"
+        self._lsp_header = header
+        self._connector.send("set_lsp_header", header)
+
+    def get_lsp_header(self) -> str:
+        """
+        Get the current LSP header.
+        Returns:
+            str: The current LSP header.
+        """
+        return self._lsp_header
 
 
 if __name__ == "__main__":
