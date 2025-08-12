@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.5.1 (2025-08-12)
+
+### Bug Fixes
+
+- **readme**: Pyqt6 typo
+  ([`57a7eb0`](https://github.com/bec-project/qtmonaco/commit/57a7eb097e8125c4b7345a7f5b8a533fd640eb7a))
+
+### Build System
+
+- Pyside6 upgraded to 6.9.0
+  ([`a1e07b6`](https://github.com/bec-project/qtmonaco/commit/a1e07b67b6f363306f20309d1db2bc16a3cad8e9))
+
+
 ## v0.5.0 (2025-07-25)
 
 ### Features
