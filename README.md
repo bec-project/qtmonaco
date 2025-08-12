@@ -1,6 +1,7 @@
 # QTMonaco
 
-A Python library that embeds the Monaco Editor (the editor that powers VS Code) into Qt applications using PySide6/PyQt.
+A Python library that embeds the Monaco Editor (the editor that powers VS Code) into Qt applications using
+PySide6/PyQt6.
 
 *Inspired by [monaco-qt](https://github.com/DaelonSuzuka/monaco-qt) by DaelonSuzuka.*
 
