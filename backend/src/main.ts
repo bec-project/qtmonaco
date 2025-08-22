@@ -89,9 +89,13 @@ function updateFromPython(name: string, value: string) {
   switch (name) {
     case "set_text":
       if (model) {
-        model.setValue(data);
+        model.dispose();
       }
+      const new_model = monaco.editor.createModel(data.data, data.language, monaco.Uri.parse(data.uri));
+      editor.setModel(new_model);
+      sendToPython("_current_uri", new_model.uri.toString());
       break;
+
     case "read":
       // Readout the current value from the editor
       const currentValue = editor.getValue();
