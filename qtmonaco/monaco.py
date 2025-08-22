@@ -47,6 +47,7 @@ class Monaco(QWebEngineView):
         self._initialized = False
         self._lsp_header = ""
         self._buffer = []
+        self._current_uri = None
 
         page = MonacoPage(parent=self)
         self.setPage(page)
@@ -115,7 +116,7 @@ class Monaco(QWebEngineView):
     ### Public API Methods ###
     ##########################
 
-    def set_text(self, value: str):
+    def set_text(self, value: str, language: str | None = None, uri: str | None = None):
         """
         Set the value in the editor.
 
@@ -129,7 +130,8 @@ class Monaco(QWebEngineView):
         if not isinstance(value, str):
             raise TypeError("Value must be a string.")
         self._value = value
-        self._connector.send("set_text", value)
+        data = {"data": value, "language": language, "uri": uri}
+        self._connector.send("set_text", data)
         self.text_changed.emit(value)
 
     def get_text(self):
