@@ -88,12 +88,20 @@ function updateFromPython(name: string, value: string) {
   const model = editor.getModel();
   switch (name) {
     case "set_text":
-      if (model) {
+      // If the model exists and the user specified a new language or uri
+      // dispose the old model
+      if (model && (data.language || data.uri)) {
         model.dispose();
-      }
-      const new_model = monaco.editor.createModel(data.data, data.language, monaco.Uri.parse(data.uri));
+        let language = data.language ?? undefined;
+        let uri = data.uri ? monaco.Uri.parse(data.uri) : undefined;
+
+        const new_model = monaco.editor.createModel(data.data, language, uri);
       editor.setModel(new_model);
       sendToPython("_current_uri", new_model.uri.toString());
+      } else {
+        // If no new language or uri is specified, just update the text
+        editor.setValue(data.data);
+      }
       break;
 
     case "read":
