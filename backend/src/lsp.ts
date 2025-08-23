@@ -170,17 +170,8 @@ class LspClient {
           const items = Array.isArray(result) ? result : result.items;
 
           const suggestions = items.map((item: any) => ({
-            label: item.label,
-            kind: monaco.languages.CompletionItemKind.Function,
-            insertText: item.insertText ?? item.label,
-            documentation: item.documentation
-              ? typeof item.documentation === "string"
-                ? { value: item.documentation }
-                : item.documentation
-              : undefined,
-            range: item.range,
+            ...item,
           }));
-
           return { suggestions };
         } catch (e) {
           console.error("LSP completion failed:", e);
