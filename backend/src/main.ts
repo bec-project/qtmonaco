@@ -96,8 +96,8 @@ function updateFromPython(name: string, value: string) {
         let uri = data.uri ? monaco.Uri.parse(data.uri) : undefined;
 
         const new_model = monaco.editor.createModel(data.data, language, uri);
-      editor.setModel(new_model);
-      sendToPython("_current_uri", new_model.uri.toString());
+        editor.setModel(new_model);
+        sendToPython("_current_uri", new_model.uri.toString());
       } else {
         // If no new language or uri is specified, just update the text
         editor.setValue(data.data);
@@ -221,6 +221,21 @@ function updateFromPython(name: string, value: string) {
       }
       break;
     }
+    case "add_action":
+      // Add a new action to the editor
+      let action = data;
+      if (action && typeof action === "object") {
+        action.contextMenuGroupId = "navigation";
+        action.contextMenuOrder = 1.5;
+        action.run = () => {
+          sendToPython(`_context_menu_action`, {
+            id: action.id,
+            label: action.label,
+          });
+        };
+        editor.addAction(action);
+      }
+      break;
     case "theme":
       // Set the theme - Monaco will use a fallback if the theme doesn't exist
       try {
