@@ -122,7 +122,6 @@ class Monaco(QWebEngineView):
     def _signature_help(self, value):
         if not isinstance(value, dict):
             return
-        print("Signature help received:", value)
         self.signature_help_triggered.emit(value)
 
     ##########################
