@@ -33,6 +33,7 @@ class Monaco(QWebEngineView):
     text_changed = Signal(str)
     language_changed = Signal(str)
     theme_changed = Signal(str)
+    context_menu_action_triggered = Signal(str)
     signature_help_triggered = Signal(dict)
 
     def __init__(self, parent=None):
@@ -112,6 +113,11 @@ class Monaco(QWebEngineView):
             return
         self._value = value
         self.text_changed.emit(value)
+
+    def _context_menu_action(self, value):
+        if not isinstance(value, dict) or "id" not in value:
+            return
+        self.context_menu_action_triggered.emit(value["id"])
 
     def _signature_help(self, value):
         if not isinstance(value, dict):
@@ -278,6 +284,20 @@ class Monaco(QWebEngineView):
         """
         return self._lsp_header
 
+    def add_action(self, action_id: str, label: str, language: str = "python"):
+        """
+        Add a new action to the editor.
+
+        Args:
+            action_id (str): The unique identifier for the action.
+            label (str): The label to display for the action.
+            language (str): The programming language for the action.
+        """
+        self._connector.send(
+            "add_action",
+            {"id": action_id, "label": label, "precondition": f"editorLangId == '{language}'"},
+        )
+
 
 if __name__ == "__main__":
     import logging
@@ -290,5 +310,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     editor = Monaco()
     editor.set_minimap_enabled(False)
+    editor.set_language("python")
+    editor.add_action("add_scan", "Add Scan")
     editor.show()
     sys.exit(app.exec_())
