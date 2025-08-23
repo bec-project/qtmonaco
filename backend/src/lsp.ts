@@ -1,6 +1,7 @@
 import * as monaco from "monaco-editor";
 import { listen } from "vscode-ws-jsonrpc";
 import type { MessageConnection } from "vscode-jsonrpc";
+import { getPythonSnippets } from "./snippets";
 
 export type LspCompletionItem = {
   label: string;
@@ -146,6 +147,11 @@ class LspClient {
         let line = position.lineNumber - 1;
         const character = position.column - 1;
 
+        // Extract the current word being typed
+        const wordAtPosition = model.getWordUntilPosition(position);
+        const currentWord = wordAtPosition ? wordAtPosition.word : "";
+        console.log("Current word for snippet filtering:", currentWord);
+
         // add the length of the prepended data to the line
         if (this.prependedData) {
           const prependedLines = this.prependedData.split("\n").length - 1;
@@ -169,11 +175,32 @@ class LspClient {
           });
 
           const items = Array.isArray(result) ? result : result.items;
-
+          items.forEach((item: any) => {
+            console.log("Inserting snippet:", JSON.stringify(item));
+          });
           const suggestions = items.map((item: any) => ({
             ...item,
           }));
-          return { suggestions };
+
+          // Add Python snippets from the snippets module, filtered by the current word
+          const wordAtPosition = model.getWordUntilPosition(position);
+          const currentWord = wordAtPosition ? wordAtPosition.word : "";
+
+          // Get filtered snippets with properly formatted CompletionItems
+          const snippets = getPythonSnippets(currentWord).map((snippet) => {
+            // Update the dummy range with the actual position information
+            if (snippet.range) {
+              snippet.range = {
+                startLineNumber: position.lineNumber,
+                startColumn: wordAtPosition.startColumn,
+                endLineNumber: position.lineNumber,
+                endColumn: wordAtPosition.endColumn,
+              };
+            }
+            return snippet;
+          });
+
+          return { suggestions: [...suggestions, ...snippets] };
         } catch (e) {
           console.error("LSP completion failed:", e);
 
