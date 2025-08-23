@@ -33,6 +33,8 @@ class Monaco(QWebEngineView):
     text_changed = Signal(str)
     language_changed = Signal(str)
     theme_changed = Signal(str)
+    context_menu_action_triggered = Signal(str)
+    signature_help_triggered = Signal(dict)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -47,6 +49,7 @@ class Monaco(QWebEngineView):
         self._initialized = False
         self._lsp_header = ""
         self._buffer = []
+        self._current_uri = None
 
         page = MonacoPage(parent=self)
         self.setPage(page)
@@ -111,11 +114,21 @@ class Monaco(QWebEngineView):
         self._value = value
         self.text_changed.emit(value)
 
+    def _context_menu_action(self, value):
+        if not isinstance(value, dict) or "id" not in value:
+            return
+        self.context_menu_action_triggered.emit(value["id"])
+
+    def _signature_help(self, value):
+        if not isinstance(value, dict):
+            return
+        self.signature_help_triggered.emit(value)
+
     ##########################
     ### Public API Methods ###
     ##########################
 
-    def set_text(self, value: str):
+    def set_text(self, value: str, language: str | None = None, uri: str | None = None):
         """
         Set the value in the editor.
 
@@ -129,7 +142,8 @@ class Monaco(QWebEngineView):
         if not isinstance(value, str):
             raise TypeError("Value must be a string.")
         self._value = value
-        self._connector.send("set_text", value)
+        data = {"data": value, "language": language, "uri": uri}
+        self._connector.send("set_text", data)
         self.text_changed.emit(value)
 
     def get_text(self):
@@ -269,6 +283,20 @@ class Monaco(QWebEngineView):
         """
         return self._lsp_header
 
+    def add_action(self, action_id: str, label: str, language: str = "python"):
+        """
+        Add a new action to the editor.
+
+        Args:
+            action_id (str): The unique identifier for the action.
+            label (str): The label to display for the action.
+            language (str): The programming language for the action.
+        """
+        self._connector.send(
+            "add_action",
+            {"id": action_id, "label": label, "precondition": f"editorLangId == '{language}'"},
+        )
+
 
 if __name__ == "__main__":
     import logging
@@ -281,5 +309,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     editor = Monaco()
     editor.set_minimap_enabled(False)
+    editor.set_language("python")
+    editor.add_action("add_scan", "Add Scan")
     editor.show()
     sys.exit(app.exec_())

@@ -88,10 +88,22 @@ function updateFromPython(name: string, value: string) {
   const model = editor.getModel();
   switch (name) {
     case "set_text":
-      if (model) {
-        model.setValue(data);
+      // If the model exists and the user specified a new language or uri
+      // dispose the old model
+      if (model && (data.language || data.uri)) {
+        model.dispose();
+        let language = data.language ?? undefined;
+        let uri = data.uri ? monaco.Uri.parse(data.uri) : undefined;
+
+        const new_model = monaco.editor.createModel(data.data, language, uri);
+        editor.setModel(new_model);
+        sendToPython("_current_uri", new_model.uri.toString());
+      } else {
+        // If no new language or uri is specified, just update the text
+        editor.setValue(data.data);
       }
       break;
+
     case "read":
       // Readout the current value from the editor
       const currentValue = editor.getValue();
@@ -209,6 +221,21 @@ function updateFromPython(name: string, value: string) {
       }
       break;
     }
+    case "add_action":
+      // Add a new action to the editor
+      let action = data;
+      if (action && typeof action === "object") {
+        action.contextMenuGroupId = "navigation";
+        action.contextMenuOrder = 1.5;
+        action.run = () => {
+          sendToPython(`_context_menu_action`, {
+            id: action.id,
+            label: action.label,
+          });
+        };
+        editor.addAction(action);
+      }
+      break;
     case "theme":
       // Set the theme - Monaco will use a fallback if the theme doesn't exist
       try {
@@ -234,6 +261,12 @@ function updateFromPython(name: string, value: string) {
         console.log(`Setting up LSP client with URL: ${pylspUrl}`);
         lspClient = new LspClient(pylspUrl);
         lspClient.prependedData = lspHeader || ""; // Set the LSP header if available
+
+        // Set up the signature help callback
+        lspClient.onSignatureHelp = (signatureHelp) => {
+          // Send the signature help data to Python
+          sendToPython("_signature_help", signatureHelp);
+        };
       }
       break;
     case "set_lsp_header":
@@ -241,6 +274,13 @@ function updateFromPython(name: string, value: string) {
       lspHeader = data; // Store the header for later use
       if (lspClient) {
         lspClient.prependedData = data;
+
+        // Make sure the signature help callback is still set
+        if (!lspClient.onSignatureHelp) {
+          lspClient.onSignatureHelp = (signatureHelp) => {
+            sendToPython("_signature_help", signatureHelp);
+          };
+        }
       }
       break;
     case "get_lsp_header":
@@ -252,7 +292,8 @@ function updateFromPython(name: string, value: string) {
       // Enable or disable Vim mode
       if (data === true) {
         if (!qtmonaco.vimMode) {
-          qtmonaco.vimMode = initVimMode(editor, null);
+          var statusNode = document.getElementById("status");
+          qtmonaco.vimMode = initVimMode(editor, statusNode);
           console.log("Vim mode enabled");
         }
       } else {
