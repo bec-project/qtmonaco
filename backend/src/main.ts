@@ -264,7 +264,8 @@ function updateFromPython(name: string, value: string) {
       // Enable or disable Vim mode
       if (data === true) {
         if (!qtmonaco.vimMode) {
-          qtmonaco.vimMode = initVimMode(editor, null);
+          var statusNode = document.getElementById("status");
+          qtmonaco.vimMode = initVimMode(editor, statusNode);
           console.log("Vim mode enabled");
         }
       } else {
