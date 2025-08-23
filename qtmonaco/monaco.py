@@ -33,6 +33,7 @@ class Monaco(QWebEngineView):
     text_changed = Signal(str)
     language_changed = Signal(str)
     theme_changed = Signal(str)
+    signature_help_triggered = Signal(dict)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -111,6 +112,12 @@ class Monaco(QWebEngineView):
             return
         self._value = value
         self.text_changed.emit(value)
+
+    def _signature_help(self, value):
+        if not isinstance(value, dict):
+            return
+        print("Signature help received:", value)
+        self.signature_help_triggered.emit(value)
 
     ##########################
     ### Public API Methods ###

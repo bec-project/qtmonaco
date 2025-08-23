@@ -23,6 +23,7 @@ class LspClient {
   private healthCheckInterval: number | null = null;
   private webSocket: WebSocket | null = null;
   public prependedData: string | null = null; // Data to prepend to the model content
+  public onSignatureHelp: ((data: monaco.languages.SignatureHelp) => void) | null = null; // Callback for signature help
 
   constructor(pylspUrl: string = "localhost:1234") {
     this.pylspUrl = pylspUrl;
@@ -257,6 +258,11 @@ class LspClient {
             activeSignature: result.activeSignature ?? 0,
             activeParameter: result.activeParameter ?? 0,
           };
+
+          // Call the signature help callback if it exists
+          if (this.onSignatureHelp) {
+            this.onSignatureHelp(signatureHelp);
+          }
 
           return {
             value: signatureHelp,
