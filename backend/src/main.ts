@@ -246,6 +246,12 @@ function updateFromPython(name: string, value: string) {
         console.log(`Setting up LSP client with URL: ${pylspUrl}`);
         lspClient = new LspClient(pylspUrl);
         lspClient.prependedData = lspHeader || ""; // Set the LSP header if available
+
+        // Set up the signature help callback
+        lspClient.onSignatureHelp = (signatureHelp) => {
+          // Send the signature help data to Python
+          sendToPython("_signature_help", signatureHelp);
+        };
       }
       break;
     case "set_lsp_header":
@@ -253,6 +259,13 @@ function updateFromPython(name: string, value: string) {
       lspHeader = data; // Store the header for later use
       if (lspClient) {
         lspClient.prependedData = data;
+
+        // Make sure the signature help callback is still set
+        if (!lspClient.onSignatureHelp) {
+          lspClient.onSignatureHelp = (signatureHelp) => {
+            sendToPython("_signature_help", signatureHelp);
+          };
+        }
       }
       break;
     case "get_lsp_header":
