@@ -1,6 +1,45 @@
 # CHANGELOG
 
 
+## v0.6.0 (2025-08-31)
+
+### Bug Fixes
+
+- Add status bar for vim; otherwise some features do not work
+  ([`4cca2fa`](https://github.com/bec-project/qtmonaco/commit/4cca2fae9041442fffd7b3ff45dcde45c471d2bf))
+
+- Remove debugging print
+  ([`3a56dc9`](https://github.com/bec-project/qtmonaco/commit/3a56dc928a80202b55608c19c52ac69d2f9512b9))
+
+- Simplify completion provider
+  ([`db361ab`](https://github.com/bec-project/qtmonaco/commit/db361abebbd1884150341e53f816a9a57cd19a6d))
+
+- Update existing model unless a new file is specified
+  ([`8ac7297`](https://github.com/bec-project/qtmonaco/commit/8ac7297eb0cc826d326292bc00a4269e6157d195))
+
+### Features
+
+- Add option for adding custom context menu actions
+  ([`83d1985`](https://github.com/bec-project/qtmonaco/commit/83d198529ea91dee2575c4529e681890ca52e56e))
+
+- Add support for model uris
+  ([`6ac4758`](https://github.com/bec-project/qtmonaco/commit/6ac4758b041d8afb5e058d92658e6116c51a802f))
+
+- Add support for receiving signature notifications
+  ([`af9ffc0`](https://github.com/bec-project/qtmonaco/commit/af9ffc00ad7bfcad256674e373a0b3628d208cfa))
+
+- First version with support for snippets
+  ([`ac21838`](https://github.com/bec-project/qtmonaco/commit/ac21838613fbe109eced3d8dd122a2a5814db091))
+
+- Generalize editor updates; add option to disable scroll beyond last line
+  ([`e0fc4e2`](https://github.com/bec-project/qtmonaco/commit/e0fc4e2996b048b9329bca864564e3d1f0ecc787))
+
+### Refactoring
+
+- Move providers to separate module
+  ([`a95642e`](https://github.com/bec-project/qtmonaco/commit/a95642ed9578b8f648d191a2e2d5220567196fe4))
+
+
 ## v0.5.1 (2025-08-12)
 
 ### Bug Fixes
