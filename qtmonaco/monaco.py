@@ -198,7 +198,16 @@ class Monaco(QWebEngineView):
         Args:
             enabled (bool): True to enable the minimap, False to disable it.
         """
-        self._connector.send("minimap", enabled)
+        self._connector.send("update_editor_options", {"minimap": {"enabled": enabled}})
+
+    def set_scroll_beyond_last_line(self, enabled: bool):
+        """
+        Enable or disable scrolling beyond the last line in the editor.
+
+        Args:
+            enabled (bool): True to enable scrolling beyond the last line, False to disable it.
+        """
+        self._connector.send("update_editor_options", {"scrollBeyondLastLine": enabled})
 
     def get_theme(self):
         return self._theme
@@ -309,6 +318,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     editor = Monaco()
     editor.set_minimap_enabled(False)
+    editor.set_scroll_beyond_last_line(False)
     editor.set_language("python")
     editor.add_action("add_scan", "Add Scan")
     editor.show()
