@@ -200,7 +200,7 @@ class Monaco(QWebEngineView):
         """
         self._connector.send("update_editor_options", {"minimap": {"enabled": enabled}})
 
-    def set_scroll_beyond_last_line(self, enabled: bool):
+    def set_scroll_beyond_last_line_enabled(self, enabled: bool):
         """
         Enable or disable scrolling beyond the last line in the editor.
 
@@ -208,6 +208,15 @@ class Monaco(QWebEngineView):
             enabled (bool): True to enable scrolling beyond the last line, False to disable it.
         """
         self._connector.send("update_editor_options", {"scrollBeyondLastLine": enabled})
+
+    def set_line_numbers_mode(self, mode: Literal["on", "off", "relative", "interval"]):
+        """
+        Set the line numbers mode in the editor.
+
+        Args:
+            mode (Literal["on", "off", "relative", "interval"]): The line numbers mode to set.
+        """
+        self._connector.send("update_editor_options", {"lineNumbers": mode})
 
     def get_theme(self):
         return self._theme
@@ -318,7 +327,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     editor = Monaco()
     editor.set_minimap_enabled(False)
-    editor.set_scroll_beyond_last_line(False)
+    editor.set_scroll_beyond_last_line_enabled(False)
     editor.set_language("python")
     editor.add_action("add_scan", "Add Scan")
     editor.show()
