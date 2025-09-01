@@ -13,7 +13,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-    "PySide6>=6.8,<=6.9.0",
+    "PySide6>=6.8",
     "qtpy~=2.4",
     "python-lsp-server[all,websockets] ~= 1.12",
 ]
