@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.0 (2025-09-01)
+
+### Features
+
+- Add set line number mode option
+  ([`414c1eb`](https://github.com/bec-project/qtmonaco/commit/414c1eb90df0c651cbdeafbc1aa8ed0677206b69))
+
+
 ## v0.6.0 (2025-08-31)
 
 ### Bug Fixes
