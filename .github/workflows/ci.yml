@@ -69,6 +69,8 @@ jobs:
             python-version: '3.11'
         - name: Setup headless display
           uses: pyvista/setup-headless-display-action@v3
+          with: 
+            qt: true
         - name: Install os dependencies
           shell: bash
           run: |
