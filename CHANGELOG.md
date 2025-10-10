@@ -1,6 +1,21 @@
 # CHANGELOG
 
 
+## v0.7.1 (2025-10-10)
+
+### Bug Fixes
+
+- **model**: Only create a new model if language or uri changes
+  ([`62c68ec`](https://github.com/bec-project/qtmonaco/commit/62c68eca10d19f67477eabe3bce7fc6e3cb2f96a))
+
+### Documentation
+
+- Add movie to README
+  ([`4aa4b2a`](https://github.com/bec-project/qtmonaco/commit/4aa4b2a6e77bfbd78362a79b86e426337cd5e49d))
+
+Added an output image to the README for better visualization.
+
+
 ## v0.7.0 (2025-09-01)
 
 ### Features
