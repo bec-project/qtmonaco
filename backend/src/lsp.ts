@@ -25,6 +25,7 @@ class LspClient {
   private webSocket: WebSocket | null = null;
   public prependedData: string | null = null; // Data to prepend to the model content
   public onSignatureHelp: ((data: monaco.languages.SignatureHelp) => void) | null = null; // Callback for signature help
+  public settings: object | null = null; // Store workspace settings
 
   constructor(pylspUrl: string = "localhost:1234") {
     this.pylspUrl = pylspUrl;
@@ -43,6 +44,7 @@ class LspClient {
     webSocket.onopen = () => {
       console.log("WebSocket connected");
       this.reconnectAttempts = 0; // Reset on successful connection
+      this.onConnectionOpened();
     };
 
     webSocket.onerror = (error) => {
@@ -99,6 +101,7 @@ class LspClient {
             console.log("LSP connection initialized successfully");
             // Start health check for this connection
             this.startHealthCheck();
+            this.onConnectionOpened();
           })
           .catch((error) => {
             console.error("Failed to initialize LSP:", error);
@@ -114,6 +117,16 @@ class LspClient {
         this.registerMonacoProviders();
       },
     });
+  }
+
+  private onConnectionOpened() {
+    console.log("LSP connection opened");
+    // If there are stored settings, update the workspace configuration
+    if (this.settings) {
+      this.updateWorkspaceConfiguration(this.settings).catch((error) => {
+        console.error("Failed to update workspace configuration on connection open:", error);
+      });
+    }
   }
 
   private prependModelData(model: monaco.editor.ITextModel) {
@@ -226,9 +239,6 @@ class LspClient {
         this.stopHealthCheck();
         return;
       }
-
-      console.log("Status of the current connection: ", this.isConnected() ? "Connected" : "Disconnected");
-
       // First do the basic validity check
       if (this.currentConnection && !this.isConnectionValid(this.currentConnection)) {
         console.log("Health check detected invalid connection via basic checks");
@@ -283,6 +293,32 @@ class LspClient {
 
     // Start connecting to the new URL
     this.connect();
+  }
+
+  /**
+   * Updates the workspace configuration settings for the LSP server.
+   * @param settings Configuration object with workspace settings
+   * @returns Promise that resolves when the configuration is updated
+   */
+  private async updateWorkspaceConfiguration(settings: Record<string, any>): Promise<void> {
+    if (!this.isConnectionValid(this.currentConnection)) {
+      console.warn("Cannot update workspace configuration: No valid LSP connection");
+      throw new Error("No valid LSP connection available");
+    }
+
+    try {
+      console.log("Updating workspace configuration:", settings);
+
+      // Send workspace/didChangeConfiguration notification
+      await this.currentConnection!.sendNotification("workspace/didChangeConfiguration", {
+        settings: settings,
+      });
+
+      console.log("Workspace configuration updated successfully");
+    } catch (error) {
+      console.error("Failed to update workspace configuration:", error);
+      throw error;
+    }
   }
 
   destroy() {

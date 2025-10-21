@@ -35,6 +35,7 @@ class Monaco(QWebEngineView):
     theme_changed = Signal(str)
     context_menu_action_triggered = Signal(str)
     signature_help_triggered = Signal(dict)
+    workspace_config_updated = Signal(bool, str)  # success, error_message
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -49,6 +50,7 @@ class Monaco(QWebEngineView):
         self._initialized = False
         self._lsp_header = ""
         self._buffer = []
+        self._lsp_buffer = []
         self._current_uri = None
 
         page = MonacoPage(parent=self)
@@ -86,6 +88,8 @@ class Monaco(QWebEngineView):
             host (str): The host URL for the editor.
         """
         self._connector.send("lsp_url", host)
+        for name, value in self._lsp_buffer:
+            self._connector.send(name, value)
 
     def on_new_data_received(self, name: str, value: str):
         """
@@ -123,6 +127,14 @@ class Monaco(QWebEngineView):
         if not isinstance(value, dict):
             return
         self.signature_help_triggered.emit(value)
+
+    def _workspace_config_updated(self, value):
+        """Handle workspace configuration update response from JavaScript."""
+        if not isinstance(value, dict):
+            return
+        success = value.get("success", False)
+        error_message = value.get("error", "")
+        self.workspace_config_updated.emit(success, error_message)
 
     ##########################
     ### Public API Methods ###
@@ -315,6 +327,25 @@ class Monaco(QWebEngineView):
             {"id": action_id, "label": label, "precondition": f"editorLangId == '{language}'"},
         )
 
+    def update_workspace_configuration(self, settings: dict):
+        """
+        Update the workspace configuration settings for the LSP server.
+
+        Args:
+            settings (dict): Configuration object with workspace settings.
+                           Example: {"python": {"analysis": {"autoImportCompletions": True}}}
+
+        Signals:
+            workspace_config_updated: Emitted when the configuration update completes.
+                                    Parameters: (success: bool, error_message: str)
+        """
+        if not isinstance(settings, dict):
+            raise TypeError("Settings must be a dictionary.")
+        if not self._initialized:
+            self._lsp_buffer.append(("update_workspace_config", settings))
+            return
+        self._connector.send("update_workspace_config", settings)
+
 
 if __name__ == "__main__":
     import logging
@@ -330,5 +361,8 @@ if __name__ == "__main__":
     editor.set_scroll_beyond_last_line_enabled(False)
     editor.set_language("python")
     editor.add_action("add_scan", "Add Scan")
+    editor.update_workspace_configuration(
+        {"pylsp": {"plugins": {"pylsp_bec": {"enabled": True, "include_params": True}}}}
+    )
     editor.show()
     sys.exit(app.exec_())

@@ -323,5 +323,22 @@ function updateFromPython(name: string, value: string) {
         }
       }
       break;
+    case "update_workspace_config":
+      // Update workspace configuration
+      if (!lspClient) {
+        console.log(lspClient);
+        console.warn("LSP client not initialized, cannot update workspace config");
+        sendToPython("_workspace_config_updated", { success: false, error: "LSP client not initialized" });
+        break;
+      }
+      if (!data || typeof data !== "object") {
+        console.warn("Invalid data provided for workspace config update");
+        sendToPython("_workspace_config_updated", { success: false, error: "Invalid data provided" });
+        break;
+      }
+
+      lspClient.settings = data; // Store settings in the LSP client
+
+      break;
   }
 }
