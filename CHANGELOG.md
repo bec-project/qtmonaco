@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.8.0 (2025-10-21)
+
+### Features
+
+- Add support for updating the lsp workspace settings
+  ([`85e6b10`](https://github.com/bec-project/qtmonaco/commit/85e6b10495e3818a11d2a359759343b266e5be0a))
+
+
 ## v0.7.1 (2025-10-10)
 
 ### Bug Fixes
