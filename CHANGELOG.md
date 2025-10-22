@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.8.1 (2025-10-22)
+
+### Bug Fixes
+
+- Send pylsp output to devnull
+  ([`30c866a`](https://github.com/bec-project/qtmonaco/commit/30c866a7fcc25c2f0445a2c612965a763129155a))
+
+
 ## v0.8.0 (2025-10-21)
 
 ### Features
