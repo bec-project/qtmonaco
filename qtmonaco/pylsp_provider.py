@@ -32,8 +32,8 @@ class PyLSPProvider:
         logger.info(f"Starting PyLSP server on port {self.port}")
         self.server_process = subprocess.Popen(
             ["pylsp", "--ws", "--port", str(self.port)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
     def stop(self):
