@@ -82,12 +82,17 @@ export function createCompletionProvider(
         });
 
         const items = Array.isArray(result) ? result : result.items;
-        items.forEach((item: any) => {
-          console.log("Inserting snippet:", JSON.stringify(item));
-        });
-        const suggestions = items.map((item: any) => ({
+
+        let suggestions = items.map((item: any) => ({
           ...item,
         }));
+
+        // Make the suggestions unique
+        suggestions = Array.from(
+          new Map(
+            suggestions.map((item) => [`${item.label}|${item.insertText ?? ""}|${item.kind ?? ""}`, item])
+          ).values()
+        );
 
         // Get filtered snippets with properly formatted CompletionItems
         const snippets = getPythonSnippets(currentWord).map((snippet) => {
