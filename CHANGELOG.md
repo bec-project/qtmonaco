@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.8.2 (2025-10-30)
+
+### Bug Fixes
+
+- Remove duplicated completion items
+  ([`9cb5f3d`](https://github.com/bec-project/qtmonaco/commit/9cb5f3db81028a7f85a98b960b1da116cd17e296))
+
+
 ## v0.8.1 (2025-10-22)
 
 ### Bug Fixes
