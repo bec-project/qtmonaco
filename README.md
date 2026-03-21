@@ -32,7 +32,7 @@ widget = Monaco()
 widget.resize(800, 600)
 widget.set_language("python")
 widget.set_theme("vs-dark")
-widget.editor.set_minimap_enabled(False)
+widget.set_minimap_enabled(False)
 widget.set_text(
     """
 import numpy as np
