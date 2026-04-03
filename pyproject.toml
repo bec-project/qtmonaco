@@ -13,7 +13,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-    "PySide6>=6.8,<=6.9.0",
+
     "qtpy~=2.4",
     "python-lsp-server[all,websockets] ~= 1.12",
 ]
@@ -28,6 +28,15 @@ dev = [
     "pytest-xvfb~=3.0",
     "pytest~=8.0",
     "pytest-cov~=6.1.1",
+]
+
+pyside6 = [
+    "PySide6>=6.8",
+]
+
+pyqt6 = [
+    "Pyqt6",
+    "PyQtWebEngine"
 ]
 
 [project.urls]
