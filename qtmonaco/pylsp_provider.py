@@ -3,6 +3,7 @@ import logging
 import signal
 import socket
 import subprocess
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class PyLSPProvider:
         # Here you would start the PyLSP server using the found port
         logger.info(f"Starting PyLSP server on port {self.port}")
         self.server_process = subprocess.Popen(
-            ["pylsp", "--ws", "--port", str(self.port)],
+            [sys.executable, "-m", "pylsp", "--ws", "--port", str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
