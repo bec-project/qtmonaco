@@ -16,6 +16,19 @@ PySide6/PyQt6.
 
 ## Installation
 
+QTMonaco requires either PySide6 or PyQt6 as a Qt backend. Install with your preferred framework:
+
+**With PySide6 (recommended):**
+```bash
+pip install qtmonaco[pyside6]
+```
+
+**With PyQt6:**
+```bash
+pip install qtmonaco[pyqt6]
+```
+
+If you already have a Qt framework installed, you can install QTMonaco without the extra dependencies:
 ```bash
 pip install qtmonaco
 ```
