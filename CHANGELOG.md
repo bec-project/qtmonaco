@@ -1,6 +1,34 @@
 # CHANGELOG
 
 
+## v0.8.3 (2026-04-07)
+
+### Bug Fixes
+
+- Make sure the subprocess is started with the correct python version
+  ([`db7d572`](https://github.com/bec-project/qtmonaco/commit/db7d5723c1121b7503a0d5ec993c3edf98cbb8a9))
+
+Indeed when using environements, calling popen with a script created by a pyproject installation
+  won't work as the script leaves only in the environment. Here pylsp is also a python program. it
+  is therefore better to start it directly with the right interpreter
+
+### Build System
+
+- Adding optional dependencies for the qt backend
+  ([`e2464ef`](https://github.com/bec-project/qtmonaco/commit/e2464ef74ae15f59a3d6467e742b0635e17fe071))
+
+I removed the upper limit in the version of pyside as it was not working in my case... created
+  optional dependencies to use eaither pyside6 or pyqt6
+
+indeed you're internally using qtpy but forcing the installation of a given backend which doesn't
+  make sense.
+
+### Continuous Integration
+
+- Update workflow to include pyside6 dependency
+  ([`4540ffb`](https://github.com/bec-project/qtmonaco/commit/4540ffbf92b0ff7fbe3bf936915621ed2e2465ed))
+
+
 ## v0.8.2 (2025-10-30)
 
 ### Bug Fixes
