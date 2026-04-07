@@ -12,11 +12,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering",
 ]
-dependencies = [
-
-    "qtpy~=2.4",
-    "python-lsp-server[all,websockets] ~= 1.12",
-]
+dependencies = ["qtpy~=2.4", "python-lsp-server[all,websockets] ~= 1.12"]
 
 [project.optional-dependencies]
 dev = [
@@ -30,14 +26,9 @@ dev = [
     "pytest-cov~=6.1.1",
 ]
 
-pyside6 = [
-    "PySide6>=6.8",
-]
+pyside6 = ["PySide6>=6.8"]
 
-pyqt6 = [
-    "Pyqt6",
-    "PyQtWebEngine"
-]
+pyqt6 = ["PyQt6", "PyQt6-WebEngine"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/bec-project/qtmonaco/issues"
