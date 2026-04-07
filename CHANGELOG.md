@@ -1,6 +1,24 @@
 # CHANGELOG
 
 
+## v0.8.4 (2026-04-07)
+
+### Bug Fixes
+
+- Fix webengine dependency and add pyqt to ci
+  ([`71c1c97`](https://github.com/bec-project/qtmonaco/commit/71c1c9755a20bd3262d16976164748351e2514b3))
+
+### Continuous Integration
+
+- Fix webengine segfaults
+  ([`fd49400`](https://github.com/bec-project/qtmonaco/commit/fd49400f0535064a32779cf59ed53bf1e052a354))
+
+### Documentation
+
+- Update readme for new installation instructions
+  ([`343db80`](https://github.com/bec-project/qtmonaco/commit/343db8095ae3c38cfe801f1148bdd9562f5200c0))
+
+
 ## v0.8.3 (2026-04-07)
 
 ### Bug Fixes
