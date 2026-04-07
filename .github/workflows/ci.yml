@@ -59,6 +59,7 @@ jobs:
     env:
       QTWEBENGINE_DISABLE_SANDBOX: 1
       QT_QPA_PLATFORM: "offscreen"
+      QTWEBENGINE_CHROMIUM_FLAGS: "--disable-gpu"
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -85,7 +86,7 @@ jobs:
         run: |
           ls -la ./qtmonaco/js_build
           pip install .[dev]
-          pip install pyside6==6.8.3
+          pip install pyside6
       - name: Run Pytest with Coverage
         id: coverage
         run: pytest --random-order --cov=qtmonaco --cov-config=pyproject.toml --cov-branch --cov-report=xml --no-cov-on-fail tests/
