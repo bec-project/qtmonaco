@@ -30,6 +30,8 @@ pyside6 = ["PySide6>=6.8"]
 
 pyqt6 = ["PyQt6", "PyQt6-WebEngine"]
 
+pyqt5 = ["PyQt5", "PyQtWebEngine"]
+
 [project.urls]
 "Bug Tracker" = "https://github.com/bec-project/qtmonaco/issues"
 Homepage = "https://github.com/bec-project/qtmonaco"
