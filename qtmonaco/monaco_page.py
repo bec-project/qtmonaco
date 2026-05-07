@@ -1,6 +1,9 @@
 import logging
 
-from qtpy.QtWebEngineCore import QWebEnginePage
+try:
+    from qtpy.QtWebEngineCore import QWebEnginePage
+except ImportError:
+    from qtpy.QtWebEngineWidgets import QWebEnginePage
 
 logger = logging.getLogger(__name__)
 
