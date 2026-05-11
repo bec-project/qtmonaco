@@ -9,8 +9,6 @@ on:
 permissions:
   contents: read
 
-
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -19,9 +17,9 @@ jobs:
       cancel-in-progress: false
 
     env:
-      CHILD_PIPELINE_BRANCH: main  # Set the branch you want for ophyd_devices
-      BEC_CORE_BRANCH: main        # Set the branch you want for bec
-      OPHYD_DEVICES_BRANCH: main   # Set the branch you want for ophyd_devices
+      CHILD_PIPELINE_BRANCH: main # Set the branch you want for ophyd_devices
+      BEC_CORE_BRANCH: main # Set the branch you want for bec
+      OPHYD_DEVICES_BRANCH: main # Set the branch you want for ophyd_devices
       PROJECT_PATH: ${{ github.repository }}
       QTWEBENGINE_DISABLE_SANDBOX: 1
       QT_QPA_PLATFORM: "offscreen"
@@ -89,28 +87,28 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v4
         with:
-          node-version: '22.10'
+          node-version: "24"
 
       - name: Install dependencies
-        run: | 
+        run: |
           cd backend
           npm install
 
       - name: Build JS resources
         run: |
-            cd backend
-            npm run build 
+          cd backend
+          npm run build
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install Python dependencies
         run: |
-            pip install .[dev]
+          pip install .[dev]
       - name: Copy JS resources
         run: |
-            mkdir -p ./qtmonaco/js_build
-            cp -r ./backend/dist/* ./qtmonaco/js_build
+          mkdir -p ./qtmonaco/js_build
+          cp -r ./backend/dist/* ./qtmonaco/js_build
 
       - name: Semantic Version Release
         id: release
