@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.9.0 (2026-05-12)
+
+### Features
+
+- Upgrade to node 24
+  ([`982bb38`](https://github.com/bec-project/qtmonaco/commit/982bb38d0b14483e0009c50ebb58c9c853beaa0c))
+
+### Refactoring
+
+- Remove monaco-languageclient dependency
+  ([`9e2ea20`](https://github.com/bec-project/qtmonaco/commit/9e2ea20aea960e44708c20c55fb4a786c92cee4a))
+
+
 ## v0.8.4 (2026-04-07)
 
 ### Bug Fixes
