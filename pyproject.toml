@@ -12,9 +12,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering",
 ]
-dependencies = ["qtpy~=2.4", "python-lsp-server[all,websockets] ~= 1.12"]
+dependencies = [
+    "qtpy~=2.4",
+    "python-lsp-server[autopep8, flake8, mccabe, pycodestyle, pydocstyle, pyflakes, rope, yapf,websockets] ~= 1.12",
+]
 
 [project.optional-dependencies]
+all = ["python-lsp-server[all, websockets] ~= 1.12"]
 dev = [
     "coverage~=7.0",
     "isort~=5.13, >=5.13.2",
