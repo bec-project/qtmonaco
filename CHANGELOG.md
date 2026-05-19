@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.10.0 (2026-05-19)
+
+### Documentation
+
+- Update installation instructions to include [all] flag for PySide6 and PyQt6
+  ([`4b61546`](https://github.com/bec-project/qtmonaco/commit/4b61546eb412fee0bb36d705e8822cccacdf98af))
+
+### Features
+
+- Remove pylint from strict dependencies; add [all] flag
+  ([`0ada24f`](https://github.com/bec-project/qtmonaco/commit/0ada24f8fbde0d4e80366d969c2448e7cf9a19b5))
+
+
 ## v0.9.0 (2026-05-12)
 
 ### Features
