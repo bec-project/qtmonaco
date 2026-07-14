@@ -1,6 +1,12 @@
 import logging
 
-from qtpy.QtWebEngineCore import QWebEnginePage
+from qtpy import PYQT5
+
+if PYQT5:
+    from qtpy.QtWebEngineWidgets import QWebEnginePage
+else:
+    from qtpy.QtWebEngineCore import QWebEnginePage
+
 
 logger = logging.getLogger(__name__)
 
