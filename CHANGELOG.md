@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.11.0 (2026-07-14)
+
+### Features
+
+- Implement diff view functionality in Monaco editor
+  ([`2fea75b`](https://github.com/bec-project/qtmonaco/commit/2fea75b86c39bcfe2db316a902d86771fc6f74c0))
+
+
 ## v0.10.0 (2026-05-19)
 
 ### Documentation
