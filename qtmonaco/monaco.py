@@ -52,6 +52,7 @@ class Monaco(QWebEngineView):
         self._buffer = []
         self._lsp_buffer = []
         self._current_uri = None
+        self._diff_mode = False
 
         page = MonacoPage(parent=self)
         self.setPage(page)
@@ -154,9 +155,57 @@ class Monaco(QWebEngineView):
         if not isinstance(value, str):
             raise TypeError("Value must be a string.")
         self._value = value
+        self._diff_mode = False
         data = {"data": value, "language": language, "uri": uri}
         self._connector.send("set_text", data)
         self.text_changed.emit(value)
+
+    def open_diffs(
+        self,
+        original: str,
+        modified: str,
+        language: str | None = None,
+        original_uri: str | None = None,
+        modified_uri: str | None = None,
+        options: dict | None = None,
+    ):
+        """
+        Open a diff view comparing original and modified text.
+
+        Args:
+            original (str): The original text shown on the left side.
+            modified (str): The modified text shown on the right side.
+            language (str | None): Optional Monaco language id for both models.
+            original_uri (str | None): Optional URI for the original model.
+            modified_uri (str | None): Optional URI for the modified model.
+            options (dict | None): Optional Monaco diff editor options.
+        """
+        if not isinstance(original, str):
+            raise TypeError("Original value must be a string.")
+        if not isinstance(modified, str):
+            raise TypeError("Modified value must be a string.")
+        if options is not None and not isinstance(options, dict):
+            raise TypeError("Options must be a dictionary.")
+
+        self._value = modified
+        self._diff_mode = True
+        if language is not None:
+            self._language = language
+
+        editor_options = {**(options or {}), "readOnly": self._readonly}
+
+        self._connector.send(
+            "open_diffs",
+            {
+                "original": original,
+                "modified": modified,
+                "language": language,
+                "originalUri": original_uri,
+                "modifiedUri": modified_uri,
+                "options": editor_options,
+            },
+        )
+        self.text_changed.emit(modified)
 
     def get_text(self):
         """
@@ -361,6 +410,11 @@ if __name__ == "__main__":
     editor.set_scroll_beyond_last_line_enabled(False)
     editor.set_language("python")
     editor.add_action("add_scan", "Add Scan")
+    editor.open_diffs(
+        original="def foo():\n    return 42\n",
+        modified="def foo():\n    return 43\n",
+        language="python",
+    )
     editor.update_workspace_configuration(
         {"pylsp": {"plugins": {"pylsp_bec": {"enabled": True, "include_params": True}}}}
     )

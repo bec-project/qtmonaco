@@ -103,6 +103,7 @@ monaco.set_text(content: str)
 monaco.get_text() -> str
 monaco.set_cursor(line: int, column: int)  # Set cursor position
 monaco.current_cursor() -> tuple[int, int]  # Get current cursor position
+monaco.open_diffs(original: str, modified: str, language: str | None = None)
 
 # Language and syntax
 monaco.set_language(language: str)

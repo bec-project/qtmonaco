@@ -164,3 +164,67 @@ def test_monaco_insert_text(monaco_initialized, qtbot):
 
     # Check if the text is now "Line 1\nLine 2\nLine 3Start of line"
     assert editor.get_text() == "Line 1\nLine 2\nStart of line Line 3"
+
+
+def test_monaco_open_diffs(monaco_initialized, qtbot):
+    """Test that Monaco can open a diff editor."""
+    editor = monaco_initialized
+
+    editor.open_diffs(
+        "Line 1\nLine 2",
+        "Line 1\nLine changed",
+        language="python",
+        original_uri="file:///original.py",
+        modified_uri="file:///modified.py",
+    )
+    qtbot.wait(100)
+
+    assert editor.get_text() == "Line 1\nLine changed"
+    assert editor.get_language() == "python"
+    run_js_check(editor, qtbot, "window.qtmonaco.diffEditor !== null", True)
+    run_js_check(
+        editor,
+        qtbot,
+        "window.qtmonaco.diffEditor.getModel().original.getValue() === 'Line 1\\nLine 2'",
+        True,
+    )
+    run_js_check(
+        editor,
+        qtbot,
+        "window.qtmonaco.diffEditor.getModel().modified.getValue() === 'Line 1\\nLine changed'",
+        True,
+    )
+    run_js_check(
+        editor,
+        qtbot,
+        "window.qtmonaco.editor === window.qtmonaco.diffEditor.getModifiedEditor()",
+        True,
+    )
+
+    editor.set_text("Back to a regular editor")
+    qtbot.wait(100)
+
+    run_js_check(editor, qtbot, "window.qtmonaco.diffEditor === null", True)
+    run_js_check(
+        editor, qtbot, "window.qtmonaco.editor.getValue() === 'Back to a regular editor'", True
+    )
+
+
+def test_monaco_open_diffs_preserves_widget_readonly(monaco_initialized, qtbot):
+    """Test that diff options cannot override the widget read-only state."""
+    editor = monaco_initialized
+
+    editor.set_readonly(True)
+    qtbot.wait(100)
+
+    editor.open_diffs(
+        "Line 1\nLine 2", "Line 1\nLine changed", language="python", options={"readOnly": False}
+    )
+    qtbot.wait(100)
+
+    run_js_check(
+        editor,
+        qtbot,
+        "window.qtmonaco.editor.getOption(window.qtmonaco.monaco.editor.EditorOption.readOnly)",
+        True,
+    )

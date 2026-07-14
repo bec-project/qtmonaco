@@ -6,16 +6,22 @@ const container = document.getElementById("container");
 if (!container) {
   throw new Error("Container element not found");
 }
+const editorContainer: HTMLElement = container;
 
-const editor = monaco.editor.create(container, {
+const defaultEditorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   value: "",
   language: "python",
   automaticLayout: true,
   theme: "vs-dark",
-});
+};
+
+let editor = monaco.editor.create(editorContainer, defaultEditorOptions);
+let diffEditor: monaco.editor.IStandaloneDiffEditor | null = null;
+let contentChangeDisposable: monaco.IDisposable | null = null;
 
 (window as any).qtmonaco = {
   editor: editor,
+  diffEditor: diffEditor,
   monaco: monaco,
   vimMode: null as CMAdapter | null,
   initialized: false,
@@ -30,6 +36,95 @@ let lspClient: LspClient | null = null;
 let lspHeader: string | null = null;
 
 let decorationsCollection: monaco.editor.IEditorDecorationsCollection | null = null;
+
+function disposeContentChangeListener() {
+  if (contentChangeDisposable) {
+    contentChangeDisposable.dispose();
+    contentChangeDisposable = null;
+  }
+}
+
+function disposeVimMode() {
+  if (qtmonaco.vimMode) {
+    qtmonaco.vimMode.dispose();
+    qtmonaco.vimMode = null;
+  }
+}
+
+function disposeEditorModel(codeEditor: monaco.editor.IStandaloneCodeEditor) {
+  const model = codeEditor.getModel();
+  if (model) {
+    model.dispose();
+  }
+}
+
+function disposeDiffEditor() {
+  if (!diffEditor) {
+    return;
+  }
+  const diffModel = diffEditor.getModel();
+  diffEditor.dispose();
+  diffModel?.original.dispose();
+  diffModel?.modified.dispose();
+  diffEditor = null;
+  qtmonaco.diffEditor = null;
+}
+
+function setActiveEditor(newEditor: monaco.editor.IStandaloneCodeEditor) {
+  disposeContentChangeListener();
+  decorationsCollection = null;
+  editor = newEditor;
+  qtmonaco.editor = editor;
+  contentChangeDisposable = editor.onDidChangeModelContent((_event) => {
+    const model = editor.getModel();
+    if (model) {
+      sendToPython("_current_text", model.getValue());
+    }
+  });
+}
+
+function switchToStandaloneEditor() {
+  if (!diffEditor) {
+    return;
+  }
+  disposeVimMode();
+  disposeContentChangeListener();
+  disposeDiffEditor();
+  setActiveEditor(monaco.editor.create(editorContainer, defaultEditorOptions));
+}
+
+function switchToDiffEditor(data: any) {
+  disposeVimMode();
+  disposeContentChangeListener();
+  if (diffEditor) {
+    disposeDiffEditor();
+  } else {
+    disposeEditorModel(editor);
+    editor.dispose();
+  }
+
+  const options: monaco.editor.IStandaloneDiffEditorConstructionOptions = {
+    automaticLayout: true,
+    theme: "vs-dark",
+    ...(data.options || {}),
+  };
+  diffEditor = monaco.editor.createDiffEditor(editorContainer, options);
+  qtmonaco.diffEditor = diffEditor;
+
+  const language = data.language ?? undefined;
+  const originalUri = data.originalUri ? monaco.Uri.parse(data.originalUri) : undefined;
+  const modifiedUri = data.modifiedUri ? monaco.Uri.parse(data.modifiedUri) : undefined;
+  const originalModel = monaco.editor.createModel(data.original, language, originalUri);
+  const modifiedModel = monaco.editor.createModel(data.modified, language, modifiedUri);
+
+  diffEditor.setModel({
+    original: originalModel,
+    modified: modifiedModel,
+  });
+  setActiveEditor(diffEditor.getModifiedEditor());
+  sendToPython("_current_text", modifiedModel.getValue());
+  sendToPython("_current_uri", modifiedModel.uri.toString());
+}
 
 // Define init function
 function init() {
@@ -64,13 +159,7 @@ window.onload = function () {
       console.warn("Bridge javascript_data_sent.connect not available");
     }
 
-    editor.onDidChangeModelContent((_event) => {
-      const model = editor.getModel();
-      if (model) {
-        const value = model.getValue();
-        sendToPython("_current_text", value);
-      }
-    });
+    setActiveEditor(editor);
 
     init();
   });
@@ -85,9 +174,10 @@ function sendToPython(name: string, value: any) {
 function updateFromPython(name: string, value: string) {
   const data = JSON.parse(value);
   console.log(`Received update from Python: ${name} =`, data);
-  const model = editor.getModel();
   switch (name) {
-    case "set_text":
+    case "set_text": {
+      switchToStandaloneEditor();
+      const model = editor.getModel();
       if (model) {
         // Only create a new model if the URI or language is changing
         if (
@@ -113,7 +203,7 @@ function updateFromPython(name: string, value: string) {
               text: data.data,
             },
           ],
-          () => null
+          () => null,
         );
         break;
       } else {
@@ -126,6 +216,11 @@ function updateFromPython(name: string, value: string) {
         sendToPython("_current_uri", new_model.uri.toString());
         break;
       }
+    }
+
+    case "open_diffs":
+      switchToDiffEditor(data);
+      break;
 
     case "read":
       // Readout the current value from the editor
@@ -135,12 +230,14 @@ function updateFromPython(name: string, value: string) {
 
     case "update_editor_options":
       // Update editor options
+      diffEditor?.updateOptions(data);
       editor.updateOptions(data);
       break;
 
     case "set_cursor": {
       // Set the cursor position in the editor
       const position = data; // Assuming data is an object with line and column properties
+      const model = editor.getModel();
       if (model) {
         const lineNumber = position.line || 1; // Default to line 1 if not provided
         const column = position.column || 1; // Default to column 1 if not provided
@@ -187,8 +284,9 @@ function updateFromPython(name: string, value: string) {
         decorationsCollection.clear(); // Clear all decorations
       }
       break;
-    case "delete_line":
+    case "delete_line": {
       // Delete a specific line in the editor
+      const model = editor.getModel();
       if (!model) break;
       let lineToDelete: number | null = null;
       if (typeof data === "number") {
@@ -209,8 +307,10 @@ function updateFromPython(name: string, value: string) {
         model.pushEditOperations([], [editOperation], () => null); // Apply the edit operation
       }
       break;
-    case "insert":
+    }
+    case "insert": {
       // Insert text at the specified position
+      const model = editor.getModel();
       if (!model) break;
       let position = null;
       if (data.line !== null) {
@@ -228,15 +328,23 @@ function updateFromPython(name: string, value: string) {
         model.pushEditOperations([], [editOperation], () => null); // Apply the edit operation
       }
       break;
+    }
     case "readonly":
       // Set the editor to read-only mode
       const isReadOnly = data === true;
+      diffEditor?.updateOptions({ readOnly: isReadOnly });
       editor.updateOptions({ readOnly: isReadOnly });
       break;
     case "language": {
-      const model = editor.getModel();
-      if (model) {
-        monaco.editor.setModelLanguage(model, data);
+      const diffModel = diffEditor?.getModel();
+      if (diffModel) {
+        monaco.editor.setModelLanguage(diffModel.original, data);
+        monaco.editor.setModelLanguage(diffModel.modified, data);
+      } else {
+        const model = editor.getModel();
+        if (model) {
+          monaco.editor.setModelLanguage(model, data);
+        }
       }
       break;
     }
