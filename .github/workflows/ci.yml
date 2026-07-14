@@ -64,7 +64,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        qt-framework: [pyside6, pyqt6]
+        qt-framework: [pyside6, pyqt6, pyqt5]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
