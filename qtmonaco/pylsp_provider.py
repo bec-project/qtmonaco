@@ -1,5 +1,6 @@
 import atexit
 import logging
+import os
 import signal
 import socket
 import subprocess
@@ -11,12 +12,22 @@ logger = logging.getLogger(__name__)
 class PyLSPProvider:
     """A provider for the PyLSP server."""
 
-    def __init__(self):
+    def __init__(self, stop_on_exit: bool = True, *, register_signal_handlers: bool = True):
+        """Configure cleanup of the language-server subprocess.
+
+        Args:
+            stop_on_exit: Stop the server when Python exits normally.
+            register_signal_handlers: Install SIGINT and SIGTERM handlers that stop
+                the server. This replaces the application's existing handlers;
+                disable it to preserve them.
+        """
         self.port = None
         self.server_process = None
-        atexit.register(self.stop)
-        signal.signal(signal.SIGINT, self._handle_signal)
-        signal.signal(signal.SIGTERM, self._handle_signal)
+        if stop_on_exit:
+            atexit.register(self.stop)
+        if register_signal_handlers:
+            signal.signal(signal.SIGINT, self._handle_signal)
+            signal.signal(signal.SIGTERM, self._handle_signal)
 
     def _find_free_port(self):
         """Find a free port for the PyLSP server."""
@@ -59,4 +70,8 @@ class PyLSPProvider:
         return self.server_process is not None and self.server_process.poll() is None
 
 
-pylsp_server = PyLSPProvider()
+stop_on_exit = os.getenv("PYLSP_STOP_ON_EXIT", "1") == "1"
+register_signal_handlers = os.getenv("PYLSP_REGISTER_SIGNAL_HANDLERS", "1") == "1"
+pylsp_server = PyLSPProvider(
+    stop_on_exit=stop_on_exit, register_signal_handlers=register_signal_handlers
+)
