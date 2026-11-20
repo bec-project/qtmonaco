@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.12.0 (2026-11-20)
+
+### Bug Fixes
+
+- Clean up pylsp when the host exits
+  ([`5def3fc`](https://github.com/bec-project/qtmonaco/commit/5def3fce495026c096e1f9490bd149d4d8bf665b))
+
+### Features
+
+- Make pylsp signal handlers configurable
+  ([`5f4eac7`](https://github.com/bec-project/qtmonaco/commit/5f4eac7f7c32c49b79782023abdc98b44bf89c4b))
+
+
 ## v0.11.0 (2026-07-14)
 
 ### Features
