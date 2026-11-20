@@ -85,14 +85,16 @@ qapp.exec_()
 ### Language Server Protocol (LSP)
 QTMonaco comes with a built-in LSP support for python (pylsp). Extended support is planned. 
 
-The language server is stopped automatically when Python exits normally.
+The language server is stopped automatically when Python exits normally. On macOS and Linux, it
+also exits if the process that started it crashes or is killed.
 QTMonaco also installs SIGINT (Ctrl+C) and SIGTERM handlers by default. These handlers replace any
 existing handlers and stop the language server; they do not exit the application.
 
 To preserve your application's signal handlers, set `PYLSP_REGISTER_SIGNAL_HANDLERS=0` before the
 first import of `qtmonaco.pylsp_provider` or creation of a `Monaco` widget. Applications that handle
 these signals should call `qtmonaco.pylsp_provider.pylsp_server.stop()` during shutdown.
-Exit cleanup is independent: set `PYLSP_STOP_ON_EXIT=0` only if your application owns server cleanup.
+Set `PYLSP_STOP_ON_EXIT=0` to disable Python's normal-exit callback if your application owns
+server cleanup. The server still watches for the host process to exit.
 
 For a separate provider, use
 `PyLSPProvider(stop_on_exit=True, register_signal_handlers=False)`.

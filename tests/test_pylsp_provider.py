@@ -30,14 +30,9 @@ def test_default_registers_signal_handlers_and_cleans_up(provider_module):
     ]
     register_exit.assert_called_once_with(provider.stop)
 
-    process = Mock()
-    provider.server_process = process
-    provider.port = 12345
+    provider._stop_supervisor = Mock()
     register_exit.call_args.args[0]()
-    process.terminate.assert_called_once_with()
-    process.wait.assert_called_once_with(timeout=5)
-    assert provider.server_process is None
-    assert provider.port is None
+    provider._stop_supervisor.assert_called_once_with(graceful=True)
 
 
 @pytest.mark.parametrize("stop_on_exit", [False, True])
@@ -61,10 +56,9 @@ def test_cleanup_and_signal_registration_are_independent(
             call(signal.SIGINT, provider._handle_signal),
             call(signal.SIGTERM, provider._handle_signal),
         ]
-        process = Mock()
-        provider.server_process = process
+        provider._stop_supervisor = Mock()
         register_signal.call_args_list[0].args[1](signal.SIGINT, None)
-        process.terminate.assert_called_once_with()
+        provider._stop_supervisor.assert_called_once_with(graceful=True)
     else:
         register_signal.assert_not_called()
 
