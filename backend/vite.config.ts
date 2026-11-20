@@ -3,6 +3,12 @@ import monacoEditorEsmPlugin from "vite-plugin-monaco-editor-esm";
 
 export default defineConfig({
   base: "./",
+  resolve: {
+    alias: {
+      // monaco-vim still imports the editor API from Monaco's old internal path.
+      "monaco-editor/esm/vs/editor/editor.api": "monaco-editor/editor/editor.api.js",
+    },
+  },
   plugins: [
     monacoEditorEsmPlugin({
       languageWorkers: [],
