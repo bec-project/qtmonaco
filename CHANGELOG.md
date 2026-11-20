@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.12.1 (2026-11-20)
+
+### Bug Fixes
+
+- Update Monaco and patch vulnerable dependencies
+  ([`e8faeaa`](https://github.com/bec-project/qtmonaco/commit/e8faeaac51f1ced5fa8e135068af394d00b74d55))
+
+
 ## v0.12.0 (2026-11-20)
 
 ### Bug Fixes
